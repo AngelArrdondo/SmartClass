@@ -1,0 +1,69 @@
+/* Fondo azul claro (igual al login) */
+.bg-lightblue {
+  background-color: #cfe9f9;
+}
+
+/* Contenedor principal más compacto */
+.register-box {
+  width: 70%;
+  max-width: 850px;
+  min-height: 480px;
+  margin: 30px auto;
+}
+
+/* Inputs y bordes */
+.form-control {
+  border-radius: 8px;
+  border: 1px solid #bcd3e7;
+}
+
+/* Botón principal */
+.btn-warning {
+  background-color: #f7931e;
+  border: none;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.btn-warning:hover {
+  background-color: #e67e00;
+}
+
+/* Panel izquierdo con gradiente */
+.bg-primary.bg-gradient {
+  background: linear-gradient(135deg, #0056d2, #0096ff);
+}
+
+/* Animación slide derecha */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide {
+  animation: slideIn 0.8s ease;
+}
+
+/* Tipografía general */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Footer */
+footer {
+  margin-top: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .register-box {
+    width: 95%;
+    min-height: auto;
+  }
+}
