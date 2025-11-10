@@ -1,10 +1,8 @@
-/* Fondo general */
 body {
   background: linear-gradient(135deg, #f0f4ff, #ffffff);
   font-family: 'Segoe UI', sans-serif;
 }
 
-/* Animación personalizada */
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -20,12 +18,10 @@ body {
   animation: slideIn 1s ease;
 }
 
-/* Panel izquierdo con degradado */
 .bg-primary.bg-gradient {
   background: linear-gradient(135deg, #0056d2, #0096ff);
 }
 
-/* Botón principal */
 .btn-primary {
   background-color: #0056d2;
   border: none;
@@ -36,13 +32,11 @@ body {
   background-color: #003e99;
 }
 
-/* Inputs */
 .form-control {
   border-radius: 8px;
   border: 1px solid #bcd3e7;
 }
 
-/* Ajuste responsive */
 @media (max-width: 768px) {
   .row.w-75 {
     width: 90% !important;

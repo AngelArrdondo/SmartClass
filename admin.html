@@ -4,28 +4,18 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Panel Administrador | SmartClass</title>
-
-  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-
-  <!-- Estilos personalizados -->
   <link rel="stylesheet" href="assest/css/stylesAdmin.css">
 </head>
 <body>
-
   <div class="d-flex" id="wrapper">
-    
-    <!-- SIDEBAR -->
     <nav id="sidebar" class="bg-sidebar">
       <div class="sidebar-header text-center py-4">
         <img src="assest/img/logo.png" alt="Logo SmartClass" class="logo-sidebar mb-2">
         <h5 class="mb-0 text-white fw-bold">SmartClass</h5>
         <small class="text-white-50">Integral Solutions</small>
       </div>
-
       <ul class="nav flex-column px-2">
         <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
         <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people-fill me-2"></i>Profesores</a></li>
@@ -37,16 +27,12 @@
       </ul>
     </nav>
 
-    <!-- PAGE CONTENT -->
     <div id="page-content" class="flex-grow-1 d-flex flex-column">
-      
-      <!-- Topbar -->
       <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-        <div class="container-fluid">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
           <button class="btn btn-outline-primary d-md-none me-2" id="btnToggleSidebar"><i class="bi bi-list"></i></button>
-          <a class="navbar-brand d-none d-md-inline ms-1" href="#"><span class="brand-title">SmartClass</span></a>
-
-          <div class="ms-auto d-flex align-items-center">
+          <a class="navbar-brand mx-auto" href="#"><span class="brand-title fs-3 fw-bold">SmartClass</span></a>
+          <div class="d-flex align-items-center">
             <div class="me-3 text-muted small d-none d-lg-block">Administrador</div>
             <div class="dropdown">
               <a href="#" class="d-flex align-items-center text-decoration-none" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
@@ -63,89 +49,100 @@
         </div>
       </nav>
 
-      <!-- CONTENIDO CENTRAL -->
-      <main class="flex-grow-1 p-4">
-        <h4 class="fw-bold mb-4">Bienvenido al panel de administración</h4>
-        <p class="text-muted">Aquí podrás gestionar profesores, grypos, horarios y más.</p>
+      <main class="flex-grow-1 p-4 animate-slide">
+        <h4 class="fw-bold mb-4 text-primary">Bienvenido al panel de administración</h4>
+        <p class="text-muted">Gestiona profesores, grupos, horarios, salones y mucho más desde esta plataforma central.</p>
 
-        <!-- Ejemplo de tarjetas -->
-        <div class="row g-3 mt-3">
+        <div class="alert alert-info mt-3 shadow-sm">
+          <i class="bi bi-lightbulb me-2"></i>
+          <strong>Consejo:</strong> Puedes revisar el estado general del sistema o agregar nuevos usuarios desde el menú lateral.
+        </div>
+
+        <div class="row g-3 mt-4">
           <div class="col-md-3">
             <div class="card summary-card p-3">
               <div class="d-flex align-items-center">
                 <div class="icon bg-blue me-3"><i class="bi bi-person-fill"></i></div>
-                <div>
-                  <h6 class="fw-bold mb-0">Profesores</h6>
-                  <small class="text-muted">32 registrados</small>
-                </div>
+                <div><h6 class="fw-bold mb-0">Profesores</h6><small class="text-muted">32 registrados</small></div>
               </div>
             </div>
           </div>
-
           <div class="col-md-3">
             <div class="card summary-card p-3">
               <div class="d-flex align-items-center">
                 <div class="icon bg-orange me-3"><i class="bi bi-people"></i></div>
-                <div>
-                  <h6 class="fw-bold mb-0">Grupos</h6>
-                  <small class="text-muted">40</small>
-                </div>
+                <div><h6 class="fw-bold mb-0">Grupos</h6><small class="text-muted">40 activos</small></div>
               </div>
             </div>
           </div>
-
           <div class="col-md-3">
             <div class="card summary-card p-3">
               <div class="d-flex align-items-center">
                 <div class="icon bg-green me-3"><i class="bi bi-building"></i></div>
-                <div>
-                  <h6 class="fw-bold mb-0">Salones</h6>
-                  <small class="text-muted">8 disponibles</small>
-                </div>
+                <div><h6 class="fw-bold mb-0">Salones</h6><small class="text-muted">8 disponibles</small></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card summary-card p-3">
+              <div class="d-flex align-items-center">
+                <div class="icon bg-violet me-3"><i class="bi bi-calendar-week"></i></div>
+                <div><h6 class="fw-bold mb-0">Horarios</h6><small class="text-muted">Actualizados</small></div>
               </div>
             </div>
           </div>
         </div>
+
+        <section class="mt-5">
+          <h5 class="fw-bold text-dark mb-2">Resumen general</h5>
+          <p class="text-muted">SmartClass centraliza toda la gestión académica en una interfaz moderna, eficiente y segura.</p>
+          <div class="row g-3 mt-4">
+            <div class="col-md-6">
+              <div class="card p-3 border-0 shadow-sm rounded-4">
+                <h6 class="fw-bold mb-2 text-primary"><i class="bi bi-graph-up-arrow me-2"></i>Estadísticas de actividad</h6>
+                <p class="text-muted small mb-0">Últimos 7 días:</p>
+                <ul class="list-unstyled small text-muted mt-2">
+                  <li><i class="bi bi-check2-circle text-success me-1"></i> 14 profesores agregados</li>
+                  <li><i class="bi bi-check2-circle text-success me-1"></i> 5 grupos actualizados</li>
+                  <li><i class="bi bi-check2-circle text-success me-1"></i> 2 salones dados de baja</li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card p-3 border-0 shadow-sm rounded-4">
+                <h6 class="fw-bold mb-2 text-primary"><i class="bi bi-clock-history me-2"></i>Actividades recientes</h6>
+                <ul class="list-group list-group-flush small">
+                  <li class="list-group-item">📘 Nuevo grupo "Programación 2" creado</li>
+                  <li class="list-group-item">👨‍🏫 Profesor "Luis García" registrado</li>
+                  <li class="list-group-item">🏫 Salón "Lab 1" actualizado</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
-      <!-- FOOTER -->
       <footer class="py-3 text-center text-muted small bg-light mt-auto">
         © 2025 SmartClass — Integral Solutions
       </footer>
-
     </div>
   </div>
 
-  <!-- MODAL -->
-  <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addModalLabel">Agregar recurso</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-        </div>
-        <div class="modal-body">
-          Este es un ejemplo de modal (aquí podrías crear profesores, aulas, horarios, etc.).
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-          <button type="button" class="btn btn-primary">Guardar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Interacciones JS -->
   <script>
     const btnToggle = document.getElementById('btnToggleSidebar');
     const sidebar = document.getElementById('sidebar');
-
     if (btnToggle) {
       btnToggle.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
     }
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 992 && !sidebar.contains(e.target) && !btnToggle.contains(e.target)) {
+        sidebar.classList.add('collapsed');
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') sidebar.classList.add('collapsed');
+    });
   </script>
 </body>
 </html>
