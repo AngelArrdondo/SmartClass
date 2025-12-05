@@ -1,0 +1,150 @@
+/* ------------------------- */
+/* FONDO GENERAL        */
+/* ------------------------- */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #cfe1ff; /* Azul muy claro */
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ------------------------- */
+/* ENCABEZADO         */
+/* ------------------------- */
+.header {
+    width: 100%;
+    height: 70px;
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+    box-sizing: border-box;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 0; 
+}
+
+.logo {
+    width: 80px;
+    height: auto;
+}
+
+/* Contenedor del Perfil (Contiene icono y texto) */
+.perfil-container {
+    display: flex;
+    flex-direction: column; 
+    /* Esta propiedad centra horizontalmente el icono y el texto */
+    align-items: center; 
+    cursor: pointer;
+    line-height: 1.2;
+    color: #103c7a; 
+    font-size: 18px; 
+    font-weight: 600;
+}
+
+/* Icono de Perfil */
+.perfil-icon {
+    width: 60px; 
+    height: auto;
+    margin-bottom: 2px;
+    /* ELIMINADA: align-items: center; (Propiedad incorrecta para este elemento) */
+}
+
+
+/* ------------------------- */
+/* CONTENIDO PRINCIPAL    */
+/* ------------------------- */
+.contenedor {
+    flex: 1;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 25px 0; 
+    text-align: center;
+}
+
+.bienvenida {
+    font-size: clamp(20px, 6vw, 28px);
+    font-weight: 500; 
+    margin: 10px 0 35px 0; 
+    color: #103c7a;
+    padding: 0 15px;
+}
+
+/* ------------------------- */
+/* CONTENEDOR MENÚ      */
+/* ------------------------- */
+.menu-box {
+    width: 90%; 
+    max-width: 450px;
+    background: #1f56ad; 
+    border-radius: 20px;
+    padding: 25px 20px; 
+    color: white;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.menu-titulo {
+    font-size: clamp(18px, 4.5vw, 24px);
+    font-weight: bold;
+    margin-bottom: 25px; 
+    text-align: center;
+}
+
+/* ------------------------- */
+/* GRID MENÚ          */
+/* ------------------------- */
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px; 
+}
+
+/* Items */
+.item {
+    background: rgba(255,255,255,0.08); 
+    padding: 20px 10px; 
+    border-radius: 18px; 
+    transition: transform .2s, background .2s; 
+    cursor: pointer;
+}
+
+.item:hover {
+    transform: scale(1.03); 
+    background: rgba(255,255,255,0.15);
+}
+
+/* Iconos del menú */
+.icon {
+    font-size: clamp(38px, 10vw, 55px); 
+    margin-bottom: 8px;
+}
+
+.item p {
+    font-size: clamp(13px, 3.5vw, 17px); 
+    margin: 0;
+    line-height: 1.2;
+}
+@media (min-width: 480px) {
+    .menu-grid {
+        gap: 25px;
+    }
+}
+

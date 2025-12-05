@@ -1,0 +1,32 @@
+name: smartclass
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.3 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.6
+
+  # 🔌 Conexión HTTP con tu API FastAPI
+  http: ^1.6.0
+
+  # 🔐 Guardar sesión local (id, rol, token, etc.)
+  shared_preferences: ^2.3.3
+
+  # ⏰ Manejo de fechas y formatos
+  intl: ^0.20.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true

@@ -1,0 +1,201 @@
+/* =========================================================
+   1. Estilos Base
+========================================================= */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #ccd9e5;
+    color: #333;
+}
+
+/* Contenedor principal (más adaptable) */
+.login-wrapper {
+    width: 95%;
+    max-width: 360px;
+    background-color: white;
+    padding: 18px 16px;
+    border-radius: 15px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    box-sizing: border-box;
+    text-align: center;
+    margin: 0 auto;
+}
+
+/* Contenedor azul */
+.login-container {
+    width: 100%;
+    background-color: #0051a8;
+    padding: 30px 18px 26px 18px;
+    border-radius: 35px;
+    margin-top: 8px;
+    text-align: center;
+}
+
+/* LOGO — A la izquierda dentro del contenedor */
+.logo {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+/* Imagen del logo */
+.logo-image {
+    width: 85px;
+    height: 85px;
+    border-radius: 10px;
+    object-fit: cover;
+    background-color: transparent;
+}
+
+/* Título */
+h1 {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 14px;
+    color: #333;
+}
+
+/* Subtítulo */
+h2 {
+    font-size: 18px;
+    color: white;
+    margin: 0 0 18px 0;
+}
+
+/* Inputs */
+.input-group {
+    width: 100%;
+    margin-bottom: 16px;
+    position: relative;
+}
+
+.input-field {
+    width: 100%;
+    padding: 12px 10px 12px 40px;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    background-color: white;
+    box-sizing: border-box;
+}
+
+.input-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #0051a8;
+}
+
+/* Contenedor roles */
+.role-selection {
+    text-align: center;
+    width: 100%;
+    color: white;
+    margin-bottom: 20px;
+}
+
+/* Centrado de opciones */
+.role-options {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+/* Ocultar radios */
+.role-options input[type="radio"] {
+    display: none;
+}
+
+/* Píldoras */
+.role-pill {
+    display: inline-block;
+    padding: 8px 14px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.14);
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: 0.25s ease;
+    user-select: none;
+}
+
+/* Hover dorado */
+.role-pill:hover {
+    background-color: #d4af37;
+    color: #003067;
+    transform: scale(1.05);
+    box-shadow: 0 0 8px rgba(212,175,55,0.6);
+}
+
+/* Cuando está seleccionado */
+.role-options input[type="radio"]:checked + .role-pill {
+    background-color: #d4af37;
+    color: #003067;
+    font-weight: 600;
+    border-color: rgba(255,255,255,0.4);
+    box-shadow: 0 0 12px rgba(212,175,55,0.7);
+}
+
+/* Botón */
+.login-button {
+    width: 80%;
+    padding: 12px 0;
+    border: 2px solid white;
+    border-radius: 6px;
+    background-color: transparent;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 18px auto;
+    transition: 0.25s ease;
+}
+
+.login-button:hover {
+    background-color: #d4af37;
+    border-color: #d4af37;
+    color: #003067;
+    box-shadow: 0 0 12px rgba(212,175,55,0.7);
+}
+
+.footer {
+    margin-top: 14px;
+    font-size: 12px;
+    color: #666;
+}
+
+/* Escritorio */
+@media (min-width: 768px) {
+    .login-wrapper {
+        max-width: 400px;
+        padding: 26px;
+    }
+
+    .login-container {
+        padding: 32px 24px;
+    }
+}
+
+/* Extra: celulares muy pequeños */
+@media (max-width: 380px) {
+    .login-wrapper {
+        width: 92%;
+        max-width: 320px;
+        padding: 14px 12px;
+    }
+
+    h1 {
+        font-size: 20px;
+    }
+}
