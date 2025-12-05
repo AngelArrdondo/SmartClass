@@ -127,7 +127,8 @@ def get_horario(
     cursor = conn.cursor(dictionary=True)
 
     try:
-        # Base de la consulta (igual para ambos, cambia el WHERE)
+        # Base de la consulta
+        # FIX: Se cambia JOIN a LEFT JOIN para profesores y p_user
         base_query = """
             SELECT 
                 h.id as horario_id,
@@ -145,8 +146,8 @@ def get_horario(
             JOIN grupos g ON h.grupo_id = g.id
             JOIN salones s ON h.salon_id = s.id
             JOIN ciclos_escolares c ON h.ciclo_id = c.id
-            JOIN profesores p ON h.profesor_id = p.id
-            JOIN users p_user ON p.user_id = p_user.id
+            LEFT JOIN profesores p ON h.profesor_id = p.id 
+            LEFT JOIN users p_user ON p.user_id = p_user.id
             WHERE c.activo = 1 
         """
 
