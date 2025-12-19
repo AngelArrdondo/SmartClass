@@ -9,7 +9,6 @@ if (!isset($_SESSION['loggedin'])) {
 }
 
 if ($_SESSION['role_id'] != 1) {
-    // Si es cliente, lo mandamos a su dashboard correspondiente
     if ($_SESSION['role_id'] == 3) header("location: ../../client/alumno/index.php");
     elseif ($_SESSION['role_id'] == 2) header("location: ../../client/profesor/index.php");
     else header("location: ../../login.php");
@@ -17,8 +16,9 @@ if ($_SESSION['role_id'] != 1) {
 }
 
 // 2. Consulta a la Base de Datos
-$sql = "SELECT * FROM ciclos_escolares ORDER BY fecha_inicio DESC";
+$sql = "SELECT * FROM ciclos_escolares ORDER BY activo DESC, fecha_inicio DESC";
 $result = mysqli_query($conn, $sql);
+$total_registros = mysqli_num_rows($result);
 ?>
 
 <!DOCTYPE html>
@@ -31,22 +31,46 @@ $result = mysqli_query($conn, $sql);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="../../assets/css/styles.css" rel="stylesheet">
+    <style>
+        .icon-circle {
+            width: 40px; height: 40px;
+            background-color: #f0f7ff; color: #0d6efd;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+        }
+        .table-hover tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.02);
+        }
+        /* Estilo para ciclos inactivos */
+        .fila-inactiva {
+            background-color: #f8f9fa;
+        }
+        .fila-inactiva .icon-circle {
+            background-color: #e9ecef; color: #6c757d;
+        }
+    </style>
 </head>
 <body class="bg-light">
 
 <div class="d-flex" id="wrapper">
-
     <?php require_once __DIR__ . '/../../includes/menu.php'; ?>
 
     <div id="page-content" class="w-100">
         
         <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm px-4 sticky-top">
             <div class="d-flex align-items-center w-100 justify-content-between">
-                <button class="btn btn-primary d-md-none me-2" id="btnToggleSidebar"><i class="bi bi-list"></i></button>
-                <h4 class="mb-0 fw-bold text-primary">Periodos Académicos</h4>
                 <div class="d-flex align-items-center">
-                    <span class="d-none d-md-block small text-muted me-2"><?php echo $_SESSION['user_name'] ?? 'Admin'; ?></span>
-                    <img src="../../assets/img/avatar.png" alt="Admin" class="rounded-circle border" width="35" height="35">
+                    <button class="btn btn-outline-primary d-md-none me-2" id="btnToggleSidebar">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <h4 class="mb-0 fw-bold text-primary">Gestión de Periodos Académicos</h4>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="text-end me-3 d-none d-sm-block">
+                        <div class="small fw-bold"><?php echo $_SESSION['user_name'] ?? 'Admin'; ?></div>
+                        <div class="text-muted small" style="font-size: 0.75rem;">Administrador</div>
+                    </div>
+                    <img src="../../assets/img/avatar.png" alt="Admin" class="rounded-circle border" width="38" height="38">
                 </div>
             </div>
         </nav>
@@ -54,111 +78,122 @@ $result = mysqli_query($conn, $sql);
         <main class="container-fluid p-4">
             
             <?php if(isset($_GET['msg'])): ?>
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
                     <i class="bi bi-check-circle-fill me-2"></i>
                     <?php 
-                        if($_GET['msg'] == 'creado') echo "¡Nuevo ciclo escolar creado correctamente!";
-                        if($_GET['msg'] == 'actualizado') echo "¡El ciclo escolar ha sido actualizado!";
-                        if($_GET['msg'] == 'eliminado') echo "El ciclo escolar fue eliminado correctamente.";
+                        if($_GET['msg'] == 'creado') echo "¡Periodo registrado correctamente!";
+                        if($_GET['msg'] == 'actualizado') echo "¡Datos del ciclo actualizados!";
+                        if($_GET['msg'] == 'eliminado') echo "Ciclo eliminado correctamente.";
                     ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
 
             <?php if(isset($_GET['error'])): ?>
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    <strong>No se pudo eliminar:</strong>
+                    <strong>Error: </strong>
                     <?php 
-                        if($_GET['error'] == 'es_activo') echo "Este ciclo está marcado como ACTIVO. Debes activar otro ciclo antes de borrarlo.";
-                        if($_GET['error'] == 'tiene_datos') echo "Este ciclo tiene Grupos u Horarios vinculados. No puedes borrar historial académico.";
-                        if($_GET['error'] == 'sql_error') echo "Ocurrió un error de integridad en la base de datos.";
+                        if($_GET['error'] == 'es_activo') echo "No puedes eliminar el ciclo activo. Activa otro primero.";
+                        if($_GET['error'] == 'tiene_datos') echo "El ciclo tiene grupos u horarios vinculados.";
                     ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
 
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-                <div class="input-group" style="max-width: 400px;">
-                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" class="form-control border-start-0 ps-0" placeholder="Buscar ciclo (ej. 2025)..." id="buscador">
+            <div class="card border-0 shadow-sm mb-4 rounded-4">
+                <div class="card-body p-3">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-9">
+                            <label class="small text-muted fw-bold text-uppercase">Filtro de periodos</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" id="buscador" class="form-control bg-light border-0" placeholder="Buscar por nombre o año (ej: 2025)...">
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-md-end pt-3 pt-md-0">
+                            <a href="form.php" class="btn btn-primary w-100 rounded-pill py-2 shadow-sm fw-bold">
+                                <i class="bi bi-calendar-plus-fill me-2"></i> Nuevo Ciclo
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                <a href="form.php" class="btn btn-primary px-4 rounded-pill shadow-sm">
-                    <i class="bi bi-calendar-plus me-2"></i> Nuevo Ciclo
-                </a>
             </div>
 
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light text-secondary small text-uppercase">
-                                <tr>
-                                    <th class="ps-4 py-3">Nombre del Ciclo</th> 
-                                    <th class="py-3">Duración</th>              
-                                    <th class="py-3 text-center">Estatus</th>   
-                                    <th class="py-3 text-end pe-4">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                
-                                <?php 
-                                if (mysqli_num_rows($result) == 0) {
-                                    echo '<tr><td colspan="4" class="text-center py-4 text-muted">No hay ciclos escolares registrados.</td></tr>';
-                                }
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr class="text-secondary small text-uppercase">
+                                <th class="ps-4 py-3">Nombre del Ciclo</th>
+                                <th class="py-3">Duración / Fechas</th>
+                                <th class="py-3 text-center">Estatus</th>
+                                <th class="py-3 text-end pe-4">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaCiclos">
+                            <?php 
+                            if ($total_registros == 0) {
+                                echo '<tr><td colspan="4" class="text-center py-5 text-muted">No hay ciclos registrados.</td></tr>';
+                            }
 
-                                while ($row = mysqli_fetch_assoc($result)): 
-                                    
-                                    $es_activo = ($row['activo'] == 1);
-                                    $clase_fila = $es_activo ? 'table-active bg-primary bg-opacity-10' : '';
-                                    $clase_nombre = $es_activo ? 'text-primary' : 'text-secondary';
-                                    
-                                    $f_inicio = date("d/m/Y", strtotime($row['fecha_inicio']));
-                                    $f_fin = date("d/m/Y", strtotime($row['fecha_fin']));
-                                ?>
-                                
-                                <tr class="<?php echo $clase_fila; ?>">
-                                    <td class="ps-4">
-                                        <span class="fw-bold <?php echo $clase_nombre; ?> fs-5"><?php echo htmlspecialchars($row['nombre']); ?></span>
-                                        <div class="small text-muted">ID: <?php echo $row['id']; ?></div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-2 <?php echo $es_activo ? '' : 'opacity-75'; ?>">
-                                            <span class="badge bg-light text-dark border"><i class="bi bi-calendar-event me-1"></i> <?php echo $f_inicio; ?></span>
-                                            <i class="bi bi-arrow-right text-muted small"></i>
-                                            <span class="badge bg-light text-dark border"><i class="bi bi-flag me-1"></i> <?php echo $f_fin; ?></span>
+                            while ($row = mysqli_fetch_assoc($result)): 
+                                $es_activo = $row['activo'] == 1;
+                                $clase_fila = !$es_activo ? 'fila-inactiva text-muted' : '';
+                                $f_inicio = date("d/m/Y", strtotime($row['fecha_inicio']));
+                                $f_fin = date("d/m/Y", strtotime($row['fecha_fin']));
+                            ?>
+                            <tr class="<?php echo $clase_fila; ?>">
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-circle me-3">
+                                            <i class="bi <?php echo $es_activo ? 'bi-calendar-check-fill' : 'bi-calendar-x'; ?>"></i>
                                         </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <?php if ($es_activo): ?>
-                                            <span class="badge bg-success text-white px-3 py-2 rounded-pill shadow-sm">
-                                                <i class="bi bi-check-circle-fill me-1"></i> EN CURSO
-                                            </span>
-                                        <?php else: ?>
-                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary rounded-pill px-3">
-                                                Finalizado / Inactivo
-                                            </span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="text-end pe-4">
-                                        <a href="form.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-outline-primary border-0" title="Editar">
-                                            <i class="bi bi-pencil-square"></i>
+                                        <div>
+                                            <div class="fw-bold mb-0 <?php echo $es_activo ? 'text-dark' : ''; ?>">
+                                                <?php echo htmlspecialchars($row['nombre']); ?>
+                                            </div>
+                                            <small>ID: #<?php echo $row['id']; ?></small>
+                                        </div>
+                                    </div>
+                                </td>
+                                
+                                <td>
+                                    <div class="small d-flex align-items-center gap-2">
+                                        <span class="badge bg-white text-dark border-0 shadow-xs"><i class="bi bi-calendar-event me-1"></i><?php echo $f_inicio; ?></span>
+                                        <i class="bi bi-arrow-right text-muted"></i>
+                                        <span class="badge bg-white text-dark border-0 shadow-xs"><i class="bi bi-flag me-1"></i><?php echo $f_fin; ?></span>
+                                    </div>
+                                </td>
+                                
+                                <td class="text-center">
+                                    <?php if($es_activo): ?>
+                                        <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3">En Curso</span>
+                                    <?php else: ?>
+                                        <span class="badge rounded-pill bg-light text-muted border px-3">Finalizado</span>
+                                    <?php endif; ?>
+                                </td>
+                                
+                                <td class="text-end pe-4">
+                                    <div class="d-flex justify-content-end gap-1">
+                                        <a href="form.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-outline-primary rounded-circle" title="Editar">
+                                            <i class="bi bi-pencil"></i>
                                         </a>
-                                        
                                         <a href="delete.php?id=<?php echo $row['id']; ?>" 
-                                           class="btn btn-sm btn-outline-danger border-0" 
-                                           onclick="return confirm('¿Estás seguro de eliminar este ciclo?')"
+                                           class="btn btn-sm btn-outline-danger rounded-circle"
+                                           onclick="return confirm('¿Eliminar este periodo académico?')"
                                            title="Eliminar">
                                             <i class="bi bi-trash"></i>
                                         </a>
-                                    </td>
-                                </tr>
-
-                                <?php endwhile; ?>
-
-                            </tbody>
-                        </table>
-                    </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer bg-white border-top-0 py-3 text-center text-md-start">
+                    <small class="text-muted">Mostrando <strong><?php echo $total_registros; ?></strong> ciclos en el historial.</small>
                 </div>
             </div>
 
@@ -171,18 +206,17 @@ $result = mysqli_query($conn, $sql);
     const toggleBtn = document.getElementById('btnToggleSidebar');
     if(toggleBtn){
         toggleBtn.addEventListener('click', () => {
-             const sidebar = document.getElementById('sidebar'); 
-             if(sidebar) sidebar.classList.toggle('d-none');
+             document.getElementById('wrapper').classList.toggle('toggled');
         });
     }
 
+    // Buscador en tiempo real
     document.getElementById('buscador').addEventListener('keyup', function() {
-        let filtro = this.value.toLowerCase();
-        let filas = document.querySelectorAll('tbody tr');
-        
+        let valor = this.value.toLowerCase();
+        let filas = document.querySelectorAll('#tablaCiclos tr');
         filas.forEach(fila => {
-            let texto = fila.innerText.toLowerCase();
-            fila.style.display = texto.includes(filtro) ? '' : 'none';
+            let contenido = fila.textContent.toLowerCase();
+            fila.style.display = contenido.includes(valor) ? '' : 'none';
         });
     });
 </script>

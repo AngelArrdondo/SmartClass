@@ -110,12 +110,6 @@ if (isset($_GET['id'])) {
         </nav>
 
         <main class="container-fluid p-4">
-            <div class="mb-3">
-                <a href="index.php" class="text-decoration-none text-muted small">
-                    <i class="bi bi-arrow-left me-1"></i> Volver a lista de alumnos
-                </a>
-            </div>
-
             <div class="row justify-content-center">
                 <div class="col-lg-8"> 
                     <div class="card border-0 shadow-sm rounded-4">

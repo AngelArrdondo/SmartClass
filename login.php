@@ -150,14 +150,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <button type="submit" class="btn btn-admin btn-lg rounded-3 shadow-sm">Acceder al Sistema</button>
           </div>
 
-          <div class="text-center">
-            <p class="small text-muted">¿Necesitas una cuenta administrativa? <br> 
-               <a href="register.php" class="text-primary fw-bold text-decoration-none">Solicitar Registro</a>
+          <div class="text-center mt-4">
+            <!-- Registro administrativo -->
+            <p class="small text-muted mb-3">
+              ¿Necesitas una cuenta administrativa? <br>
+              <a href="register.php" class="text-primary fw-bold text-decoration-none">Solicitar Registro</a>
             </p>
-            <hr class="my-4">
-            <a href="client/login.php" class="btn btn-outline-secondary btn-sm rounded-pill px-4">
+            <hr class="my-3">
+            <!-- Botón de acceso Alumnos/Profesores -->
+            <div class="mb-3">
+              <a href="client/login.php" class="btn btn-outline-secondary btn-sm rounded-pill px-4 me-2 mb-2">
                 <i class="bi bi-people-fill me-2"></i>Acceso Alumnos y Profesores
-            </a>
+              </a>
+            </div>
+            <!-- Link para volver al inicio -->
+            <div>
+              <a href="/SmartClass/SmartClassHomePage/SmartClassHomePage/index1.html"
+                class="text-decoration-none text-secondary small">
+                Volver al inicio
+              </a>
+            </div>
           </div>
         </form>
       </div>
