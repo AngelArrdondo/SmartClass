@@ -1,33 +1,42 @@
 <?php
 session_start();
 
-// --- 1. LÓGICA DE REBOTE (Si ya hay sesión abierta, redirigir) ---
+// --- 1. LÓGICA DE REBOTE ---
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
-    
-    // Verificamos el rol para saber a dónde mandarlo
-    if ($_SESSION['role_id'] == 1) {
-        header("location: admin/index.php"); // Es Admin -> Panel Admin
-    } elseif ($_SESSION['role_id'] == 2) {
-        header("location: client/profesor/index.php"); // Es Profe -> Su Portal
-    } elseif ($_SESSION['role_id'] == 3) {
-        header("location: client/alumno/index.php"); // Es Alumno -> Su Portal
-    }
+    $redirecciones = [
+        1 => "admin/index.php",
+        2 => "client/profesor/index.php",
+        3 => "client/alumno/index.php"
+    ];
+    $url = $redirecciones[$_SESSION['role_id']] ?? "login.php";
+    header("location: $url");
     exit;
 }
-// ------------------------------------------------------------------
 
 require_once 'config/db.php';
 
 $error = '';
 
+// Inicializar contador de intentos si no existe
+if (!isset($_SESSION['attempts'])) {
+    $_SESSION['attempts'] = 0;
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    $email = trim($_POST['email']);
+    // Saneamiento de entradas
+    $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
     $password = trim($_POST['password']);
 
-    if (empty($email) || empty($password)) {
-        $error = "Por favor ingrese correo y contraseña.";
-    } else {
+    // Bloqueo temporal por intentos fallidos (Seguridad contra fuerza bruta)
+    if ($_SESSION['attempts'] >= 5) {
+        $error = "Demasiados intentos fallidos. Por seguridad, el acceso ha sido pausado.";
+    } 
+    elseif (empty($email) || empty($password)) {
+        $error = "Por favor, completa todos los campos.";
+    } 
+    else {
+        // Consulta preparada para evitar Inyección SQL
         $sql = "SELECT id, nombre, apellido_paterno, password_hash, role_id, is_active FROM users WHERE email = ?";
         
         if ($stmt = mysqli_prepare($conn, $sql)) {
@@ -42,8 +51,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if ($is_active == 1) {
                     if (password_verify($password, $hashed_password)) {
                         
-                        // --- 2. FILTRO DE SEGURIDAD (Solo Rol 1 entra aquí) ---
-                        if ($role_id == 1) { 
+                        // FILTRO DE SEGURIDAD EXCLUSIVO ADMIN (Rol 1)
+                        if ($role_id == 1) {
+                            $_SESSION['attempts'] = 0;
+                            session_regenerate_id(true);
+
                             $_SESSION['user_id'] = $id;
                             $_SESSION['user_name'] = $nombre . ' ' . $apellido;
                             $_SESSION['role_id'] = $role_id;
@@ -52,20 +64,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             header("location: admin/index.php");
                             exit;
                         } else {
-                            // Si un alumno intenta loguearse aquí (sin sesión previa), le denegamos el acceso
-                            // y le sugerimos ir a su portal
-                            $error = "Acceso denegado. Este login es solo para Administradores. <br> <a href='client/login.php' class='alert-link'>Ir al Portal Académico</a>";
+                            $error = "<strong>Acceso Denegado.</strong> Este panel es para administradores.<br><a href='client/login.php' class='alert-link'>Ir al Portal Alumnos/Profesores</a>";
                         }
-                        // ------------------------------------------------------
-
                     } else {
-                        $error = "La contraseña es incorrecta.";
+                        $_SESSION['attempts']++;
+                        $error = "Contraseña incorrecta. Intento " . $_SESSION['attempts'] . " de 5.";
                     }
                 } else {
-                    $error = "Cuenta desactivada.";
+                    $error = "Tu cuenta está desactivada temporalmente.";
                 }
             } else {
-                $error = "No existe cuenta con ese correo.";
+                $error = "No existe una cuenta de administrador con ese correo.";
             }
             mysqli_stmt_close($stmt);
         }
@@ -79,32 +88,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inicio de Sesión | SmartClass</title>
+  <title>Login Administrativo | SmartClass</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/stylesLogin.css">
+  <style>
+    body { background-color: #f0f2f5; }
+    .login-container { max-width: 950px; border-radius: 20px; overflow: hidden; }
+    .bg-gradient-admin { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
+    .input-group-text { border-right: none; background-color: #fff; }
+    .form-control { border-left: none; }
+    .form-control:focus { box-shadow: none; border-color: #dee2e6; }
+    .btn-admin { background-color: #facc15; border: none; color: #1e3a8a; font-weight: 700; }
+    .btn-admin:hover { background-color: #eab308; transform: translateY(-1px); }
+  </style>
 </head>
-<body class="bg-light">
+<body class="d-flex align-items-center justify-content-center vh-100 p-3">
     
-  <div class="container-fluid vh-100 d-flex align-items-center justify-content-center">
-    <div class="row w-75 shadow-lg rounded-4 overflow-hidden animate-slide">
+  <div class="container login-container shadow-2xl bg-white p-0">
+    <div class="row g-0">
 
-      <!-- Panel izquierdo -->
-      <div class="col-md-6 d-none d-md-flex align-items-center justify-content-center bg-primary bg-gradient text-white p-5">
-        <div class="text-center">
-          <img src="assets/img/logo.png" alt="Logo SmartClass" class="img-fluid mb-4" style="max-width: 200px;">
-          <h2 class="fw-bold">Bienvenido a SmartClass</h2>
-          <p class="mt-2">Optimiza tu gestión académica con tecnología inteligente</p>
+      <div class="col-md-6 d-none d-md-flex flex-column align-items-center justify-content-center bg-gradient-admin text-white p-5 text-center">
+        <img src="assets/img/logo.png" alt="Logo SmartClass" class="img-fluid mb-4" style="max-width: 180px;">
+        <h2 class="fw-bold">SmartClass Admin</h2>
+        <p class="opacity-75">Panel de gestión centralizada y seguridad institucional.</p>
+        <div class="mt-3">
+            <i class="bi bi-shield-lock" style="font-size: 2rem;"></i>
         </div>
       </div>
 
-      <!-- Panel derecho -->
-      <div class="col-md-6 bg-white p-5 d-flex flex-column justify-content-center animate-slide">
-        <h3 class="fw-bold text-center text-primary">Inicio de Sesión</h3>
-        <h4 class="fw-bold text-center mb-4 text-primary">SmartClass</h4>
+      <div class="col-md-6 p-4 p-lg-5">
+        <div class="mb-4">
+            <h3 class="fw-bold text-dark">Bienvenido</h3>
+            <p class="text-muted small">Ingresa tus credenciales de administrador</p>
+        </div>
 
         <?php if(!empty($error)): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div class="alert alert-danger alert-dismissible fade show small" role="alert">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i> <?php echo $error; ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -112,37 +131,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST">
           <div class="mb-3">
-            <label for="correo" class="form-label">Correo electrónico</label>
+            <label class="form-label small fw-bold text-secondary">Correo Electrónico</label>
             <div class="input-group">
-              <span class="input-group-text bg-white"><i class="bi bi-envelope"></i></span>
-              <input type="email" id="correo" name="email" class="form-control" placeholder="Ingresa tu correo" required>
+              <span class="input-group-text"><i class="bi bi-envelope-at text-primary"></i></span>
+              <input type="email" name="email" class="form-control" placeholder="nombre@uteq.edu.mx" required>
             </div>
           </div>
 
-          <div class="mb-3">
-            <label for="password" class="form-label">Contraseña</label>
+          <div class="mb-4">
+            <label class="form-label small fw-bold text-secondary">Contraseña</label>
             <div class="input-group">
-              <span class="input-group-text bg-white"><i class="bi bi-lock"></i></span>
-              <input type="password" id="password" name="password" class="form-control" placeholder="Ingresa tu contraseña" required>
+              <span class="input-group-text"><i class="bi bi-lock-fill text-primary"></i></span>
+              <input type="password" name="password" class="form-control" placeholder="••••••••" required>
             </div>
           </div>
 
-          <div class="d-grid mt-4">
-            <button type="submit" class="btn btn-primary btn-lg rounded-pill">Iniciar Sesión</button>
+          <div class="d-grid mb-3">
+            <button type="submit" class="btn btn-admin btn-lg rounded-3 shadow-sm">Acceder al Sistema</button>
           </div>
 
-          <p class="text-center mt-3">
-            ¿No tienes una cuenta?
-            <a href="register.php" class="text-decoration-none text-primary fw-semibold">Regístrate</a>
-          </p>
-          
-          <div class="text-center mt-2 small">
-            <a href="client/login.php" class="text-secondary text-decoration-none">Soy Alumno o Profesor</a>
+          <div class="text-center">
+            <p class="small text-muted">¿Necesitas una cuenta administrativa? <br> 
+               <a href="register.php" class="text-primary fw-bold text-decoration-none">Solicitar Registro</a>
+            </p>
+            <hr class="my-4">
+            <a href="client/login.php" class="btn btn-outline-secondary btn-sm rounded-pill px-4">
+                <i class="bi bi-people-fill me-2"></i>Acceso Alumnos y Profesores
+            </a>
           </div>
         </form>
       </div>
+      
     </div>
   </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

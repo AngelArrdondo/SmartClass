@@ -19,25 +19,24 @@ $paterno = "";
 $materno = "";
 $email = "";
 $telefono = "";
-$is_active = 1; // Por defecto ACTIVO al crear
+$is_active = 1;
 
 // Variables Alumno
 $alumno_id = "";
 $matricula = "";
 $grupo_id = "";
 
-// 1. Obtener grupos
+// 1. Obtener grupos para el select
 $sql_grupos = "SELECT id, codigo FROM grupos ORDER BY codigo ASC";
 $res_grupos = mysqli_query($conn, $sql_grupos);
 
-// 2. Lógica Edición
+// 2. Lógica Edición vs Nuevo
 if (isset($_GET['id'])) {
     $modo_edicion = true;
     $titulo = "Editar Alumno";
     $btn_texto = "Actualizar Datos";
     $alumno_id = $_GET['id'];
     
-    // CAMBIO 1: Agregamos 'u.is_active' a la consulta
     $sql = "
         SELECT a.id as alum_id, a.matricula, a.grupo_id,
                u.id as usr_id, u.nombre, u.apellido_paterno, u.apellido_materno, u.email, u.telefono, u.is_active
@@ -60,10 +59,26 @@ if (isset($_GET['id'])) {
             $telefono = $fila['telefono'];
             $matricula = $fila['matricula'];
             $grupo_id = $fila['grupo_id'];
-            $is_active = $fila['is_active']; // Recuperamos el estado
+            $is_active = $fila['is_active'];
         }
         mysqli_stmt_close($stmt);
     }
+} else {
+    // --- LÓGICA DE AUTOGENERACIÓN DE MATRÍCULA ---
+    $anio_actual = date("Y");
+    $sql_last = "SELECT matricula FROM alumnos WHERE matricula LIKE '$anio_actual%' ORDER BY matricula DESC LIMIT 1";
+    $res_last = mysqli_query($conn, $sql_last);
+    
+    if ($fila_last = mysqli_fetch_assoc($res_last)) {
+        $ultimo_numero = substr($fila_last['matricula'], 4);
+        $siguiente_numero = str_pad((int)$ultimo_numero + 1, 4, "0", STR_PAD_LEFT);
+        $matricula = $anio_actual . $siguiente_numero;
+    } else {
+        $matricula = $anio_actual . "0001";
+    }
+
+    // --- LÓGICA DE AUTOGENERACIÓN DE CORREO ---
+    $email = $matricula . "@smartclass.com";
 }
 ?>
 
@@ -139,12 +154,15 @@ if (isset($_GET['id'])) {
 
                                 <div class="row g-3 mb-4">
                                     <div class="col-md-6">
-                                        <label class="form-label small fw-bold text-muted">Correo Electrónico *</label>
-                                        <input type="email" name="email" class="form-control" value="<?php echo $email; ?>" required>
+                                        <label class="form-label small fw-bold text-muted">Correo Institucional *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light"><i class="bi bi-envelope-at text-primary"></i></span>
+                                            <input type="email" id="email_input" name="email" class="form-control fw-bold" value="<?php echo $email; ?>" required>
+                                        </div>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label small fw-bold text-muted">Teléfono</label>
-                                        <input type="tel" name="telefono" class="form-control" value="<?php echo $telefono; ?>">
+                                        <input type="tel" name="telefono" class="form-control" value="<?php echo $telefono; ?>" maxlength="10">
                                     </div>
                                 </div>
 
@@ -153,7 +171,13 @@ if (isset($_GET['id'])) {
                                 <div class="row g-3 mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label small fw-bold text-muted">Matrícula Escolar *</label>
-                                        <input type="text" name="matricula" class="form-control fw-bold" value="<?php echo $matricula; ?>" required>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light"><i class="bi bi-hash text-primary"></i></span>
+                                            <input type="text" id="matricula_input" name="matricula" class="form-control fw-bold <?php echo !$modo_edicion ? 'text-primary' : ''; ?>" 
+                                                   value="<?php echo $matricula; ?>" 
+                                                   placeholder="YYYY0000"
+                                                   required>
+                                        </div>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label small fw-bold text-muted">Grupo Asignado</label>
@@ -169,7 +193,7 @@ if (isset($_GET['id'])) {
                                 </div>
 
                                 <div class="d-grid gap-2 mt-5">
-                                    <button type="submit" class="btn btn-primary fw-bold py-2">
+                                    <button type="submit" class="btn btn-primary fw-bold py-2 shadow-sm">
                                         <i class="bi bi-save me-2"></i> <?php echo $btn_texto; ?>
                                     </button>
                                     <a href="index.php" class="btn btn-light border text-muted">Cancelar</a>
@@ -184,13 +208,30 @@ if (isset($_GET['id'])) {
         </main>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // Sidebar Toggle
     const toggleBtn = document.getElementById('btnToggleSidebar');
     if(toggleBtn){
         toggleBtn.addEventListener('click', () => {
              const sidebar = document.getElementById('sidebar'); 
              if(sidebar) sidebar.classList.toggle('d-none');
+        });
+    }
+
+    // --- LÓGICA DE SINCRONIZACIÓN MATRÍCULA -> CORREO ---
+    const matriculaInput = document.getElementById('matricula_input');
+    const emailInput = document.getElementById('email_input');
+    const esModoEdicion = <?php echo $modo_edicion ? 'true' : 'false'; ?>;
+
+    // Solo automatizamos en modo creación para evitar errores en registros antiguos
+    if(!esModoEdicion) {
+        matriculaInput.addEventListener('input', function() {
+            const matriculaActual = this.value.trim();
+            if(matriculaActual !== "") {
+                emailInput.value = matriculaActual + "@smartclass.com";
+            }
         });
     }
 </script>
