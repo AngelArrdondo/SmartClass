@@ -8,7 +8,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['role_id'] != 1) {
     exit;
 }
 
-// CONSULTA SQL
+// CONSULTA SQL (Asegúrate de haber ejecutado el ALTER TABLE para horas_semanales)
 $sql = "SELECT * FROM materias ORDER BY nombre ASC";
 $result = mysqli_query($conn, $sql);
 $total_registros = mysqli_num_rows($result);
@@ -26,18 +26,22 @@ $total_registros = mysqli_num_rows($result);
     <link href="../../assets/css/styles.css" rel="stylesheet">
     <style>
         .icon-circle {
-            width: 40px;
-            height: 40px;
-            background-color: #f0f7ff;
-            color: #0d6efd;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
+            width: 42px; height: 42px;
+            background-color: #f0f7ff; color: #0d6efd;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px; /* Un poco más moderno que el círculo perfecto */
         }
         .table-hover tbody tr:hover {
-            background-color: rgba(13, 110, 253, 0.02);
+            background-color: rgba(13, 110, 253, 0.03);
+            transition: background-color 0.2s ease;
         }
+        .badge-hora {
+            background-color: #eef2ff;
+            color: #4338ca;
+            border: 1px solid #c7d2fe;
+            font-weight: 600;
+        }
+        .progress { background-color: #e9ecef; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-light">
@@ -57,7 +61,7 @@ $total_registros = mysqli_num_rows($result);
                 </div>
                 <div class="d-flex align-items-center">
                     <div class="text-end me-3 d-none d-sm-block">
-                        <div class="small fw-bold"><?php echo $_SESSION['user_name'] ?? 'Admin'; ?></div>
+                        <div class="small fw-bold"><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Admin'); ?></div>
                         <div class="text-muted small" style="font-size: 0.75rem;">Administrador</div>
                     </div>
                     <img src="../../assets/img/avatar.png" alt="Admin" class="rounded-circle border" width="38" height="38">
@@ -69,19 +73,16 @@ $total_registros = mysqli_num_rows($result);
             
             <?php if(isset($_GET['msg'])): ?>
                 <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
-                    <i class="bi bi-check-circle-fill me-2"></i>
-                    <?php 
-                        if($_GET['msg'] == 'creado') echo "¡Materia registrada exitosamente!";
-                        if($_GET['msg'] == 'actualizado') echo "¡Materia actualizada!";
-                        if($_GET['msg'] == 'eliminado') echo "Materia eliminada del catálogo.";
-                    ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            <?php endif; ?>
-
-            <?php if(isset($_GET['error'])): ?>
-                <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i> No se puede eliminar: Esta materia está en uso.
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                        <div>
+                            <?php 
+                                if($_GET['msg'] == 'creado') echo "¡Materia registrada exitosamente!";
+                                if($_GET['msg'] == 'actualizado') echo "¡Materia actualizada correctamente!";
+                                if($_GET['msg'] == 'eliminado') echo "Materia eliminada del catálogo.";
+                            ?>
+                        </div>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
@@ -90,15 +91,14 @@ $total_registros = mysqli_num_rows($result);
                 <div class="card-body p-3">
                     <div class="row g-3 align-items-center">
                         <div class="col-md-9">
-                            <label class="small text-muted fw-bold text-uppercase">Búsqueda rápida</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-0"><i class="bi bi-search text-muted"></i></span>
-                                <input type="text" id="buscador" class="form-control bg-light border-0" placeholder="Buscar por código o nombre de materia...">
+                                <input type="text" id="buscador" class="form-control bg-light border-0" placeholder="Buscar por código, nombre o descripción...">
                             </div>
                         </div>
-                        <div class="col-md-3 text-md-end pt-3 pt-md-0">
+                        <div class="col-md-3 text-md-end">
                             <a href="form.php" class="btn btn-primary w-100 rounded-pill py-2 shadow-sm fw-bold">
-                                <i class="bi bi-journal-plus me-2"></i> Nueva Materia
+                                <i class="bi bi-journal-plus me-1"></i> Nueva Materia
                             </a>
                         </div>
                     </div>
@@ -110,85 +110,88 @@ $total_registros = mysqli_num_rows($result);
                     <table class="table table-hover align-middle mb-0">
                         <thead class="bg-light">
                             <tr class="text-secondary small text-uppercase">
-                                <th class="ps-4 py-3">Materia</th>
+                                <th class="ps-4 py-3" style="width: 35%;">Materia</th>
                                 <th class="py-3">Código</th>
+                                <th class="py-3">Carga Horaria</th>
                                 <th class="py-3">Créditos</th>
-                                <th class="py-3">Descripción</th>
                                 <th class="py-3 text-end pe-4">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tablaMaterias">
-                            <?php 
-                            if ($total_registros == 0) {
-                                echo '<tr><td colspan="5" class="text-center py-5 text-muted">No hay materias registradas.</td></tr>';
-                            }
-
-                            while ($row = mysqli_fetch_assoc($result)): 
-                                $creditos = $row['creditos'];
-                                $porcentaje = min(($creditos / 10) * 100, 100);
-                                
-                                $barra_color = 'bg-info';
-                                if($creditos >= 8) $barra_color = 'bg-success';
-                                if($creditos <= 4) $barra_color = 'bg-warning';
-                                
-                                $desc = $row['descripcion'] ?? 'Sin descripción.';
-                            ?>
-                            <tr>
-                                <td class="ps-4">
-                                    <div class="d-flex align-items-center">
-                                        <div class="icon-circle me-3">
-                                            <i class="bi bi-journal-text"></i>
+                            <?php if ($total_registros == 0): ?>
+                                <tr>
+                                    <td colspan="5" class="text-center py-5">
+                                        <img src="../../assets/img/empty.svg" alt="Vacío" width="80" class="mb-3 opacity-50">
+                                        <p class="text-muted">No se encontraron materias en el sistema.</p>
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php while ($row = mysqli_fetch_assoc($result)): 
+                                    $creditos = (int)$row['creditos'];
+                                    $horas = (int)($row['horas_semanales'] ?? 0);
+                                    $porcentaje = min(($creditos / 10) * 100, 100);
+                                    
+                                    $barra_color = 'bg-info';
+                                    if($creditos >= 8) $barra_color = 'bg-success';
+                                    if($creditos <= 4) $barra_color = 'bg-warning';
+                                ?>
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="icon-circle me-3">
+                                                <i class="bi bi-journal-bookmark-fill"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold mb-0 text-dark"><?php echo htmlspecialchars($row['nombre']); ?></div>
+                                                <div class="text-muted small text-truncate" style="max-width: 250px;">
+                                                    <?php echo htmlspecialchars($row['descripcion'] ?? 'Sin descripción'); ?>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <div class="fw-bold mb-0 text-dark"><?php echo htmlspecialchars($row['nombre']); ?></div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 font-monospace">
+                                            <?php echo htmlspecialchars($row['codigo']); ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-hora px-3 py-2 rounded-pill">
+                                            <i class="bi bi-calendar3 me-1"></i> <?php echo $horas; ?> hrs / sem
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div style="width: 100px;">
+                                            <div class="d-flex justify-content-between small mb-1">
+                                                <span class="fw-bold"><?php echo $creditos; ?></span>
+                                                <span class="text-muted">Créd.</span>
+                                            </div>
+                                            <div class="progress" style="height: 6px;">
+                                                <div class="progress-bar <?php echo $barra_color; ?> shadow-none" 
+                                                     role="progressbar" style="width: <?php echo $porcentaje; ?>%"></div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </td>
-                                
-                                <td>
-                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 font-monospace">
-                                        <?php echo htmlspecialchars($row['codigo']); ?>
-                                    </span>
-                                </td>
-                                
-                                <td>
-                                    <div style="width: 100px;">
-                                        <div class="d-flex justify-content-between small mb-1">
-                                            <span class="fw-bold"><?php echo $creditos; ?></span>
-                                            <span class="text-muted">Créd.</span>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <div class="btn-group">
+                                            <a href="form.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-light border rounded-circle me-2" title="Editar">
+                                                <i class="bi bi-pencil text-primary"></i>
+                                            </a>
+                                            <a href="delete.php?id=<?php echo $row['id']; ?>" 
+                                               class="btn btn-sm btn-light border rounded-circle"
+                                               onclick="return confirm('¿Estás seguro de que deseas eliminar esta materia? Esta acción no se puede deshacer.')"
+                                               title="Eliminar">
+                                                <i class="bi bi-trash text-danger"></i>
+                                            </a>
                                         </div>
-                                        <div class="progress" style="height: 6px;">
-                                            <div class="progress-bar <?php echo $barra_color; ?> rounded" role="progressbar" style="width: <?php echo $porcentaje; ?>%"></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                
-                                <td>
-                                    <div class="text-muted small text-truncate" style="max-width: 280px;" title="<?php echo htmlspecialchars($desc); ?>">
-                                        <?php echo htmlspecialchars($desc); ?>
-                                    </div>
-                                </td>
-                                
-                                <td class="text-end pe-4">
-                                    <div class="d-flex justify-content-end gap-1">
-                                        <a href="form.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-outline-primary rounded-circle" title="Editar">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <a href="delete.php?id=<?php echo $row['id']; ?>" 
-                                           class="btn btn-sm btn-outline-danger rounded-circle"
-                                           onclick="return confirm('¿Seguro que deseas eliminar esta materia?')"
-                                           title="Eliminar">
-                                            <i class="bi bi-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            <?php endwhile; ?>
+                                    </td>
+                                </tr>
+                                <?php endwhile; ?>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
-                <div class="card-footer bg-white border-top-0 py-3">
-                    <small class="text-muted">Mostrando <strong><?php echo $total_registros; ?></strong> materias en el catálogo.</small>
+                <div class="card-footer bg-white border-top-0 py-3 text-center text-sm-start">
+                    <small class="text-muted">Mostrando <strong><?php echo $total_registros; ?></strong> registros en total.</small>
                 </div>
             </div>
 
@@ -199,20 +202,21 @@ $total_registros = mysqli_num_rows($result);
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // Sidebar Toggle
-    const toggleBtn = document.getElementById('btnToggleSidebar');
-    if(toggleBtn){
-        toggleBtn.addEventListener('click', () => {
-             document.getElementById('wrapper').classList.toggle('toggled');
-        });
-    }
+    document.getElementById('btnToggleSidebar')?.addEventListener('click', () => {
+        document.getElementById('wrapper').classList.toggle('toggled');
+    });
 
-    // Buscador en Tiempo Real (Mismo que en Profesores)
+    // Buscador Inteligente
     document.getElementById('buscador').addEventListener('keyup', function() {
-        let valor = this.value.toLowerCase();
+        let valor = this.value.toLowerCase().trim();
         let filas = document.querySelectorAll('#tablaMaterias tr');
+        
         filas.forEach(fila => {
-            let contenido = fila.textContent.toLowerCase();
-            fila.style.display = contenido.includes(valor) ? '' : 'none';
+            // No procesar la fila de "No hay registros"
+            if (fila.cells.length < 2) return; 
+            
+            let texto = fila.textContent.toLowerCase();
+            fila.style.display = texto.includes(valor) ? '' : 'none';
         });
     });
 </script>

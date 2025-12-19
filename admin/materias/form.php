@@ -13,7 +13,7 @@ $modo_edicion = false;
 $titulo = "Nueva Materia";
 $btn_texto = "Registrar Materia";
 
-$id = ""; $codigo = ""; $nombre = ""; $creditos = "0"; $descripcion = ""; 
+$id = ""; $codigo = ""; $nombre = ""; $creditos = "0"; $horas_semanales = "1"; $descripcion = ""; 
 
 if (isset($_GET['id'])) {
     $modo_edicion = true;
@@ -30,6 +30,7 @@ if (isset($_GET['id'])) {
             $codigo = $fila['codigo'];
             $nombre = $fila['nombre'];
             $creditos = $fila['creditos'];
+            $horas_semanales = $fila['horas_semanales'] ?? "1"; // Recuperamos las horas
             $descripcion = $fila['descripcion'] ?? "";
         }
         mysqli_stmt_close($stmt);
@@ -78,7 +79,7 @@ if (isset($_GET['id'])) {
                                                value="<?php echo $nombre; ?>" 
                                                required maxlength="100"
                                                pattern="^[a-zA-ZñÑáéíóúÁÉÍÓÚ0-9\s]+$">
-                                        <div class="invalid-feedback">Ingresa un nombre válido (letras y números únicamente).</div>
+                                        <div class="invalid-feedback">Ingresa un nombre válido.</div>
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label small fw-bold">Código Interno *</label>
@@ -94,7 +95,7 @@ if (isset($_GET['id'])) {
                                 </div>
 
                                 <div class="row g-3 mb-4">
-                                    <div class="col-md-5">
+                                    <div class="col-md-6">
                                         <label class="form-label small fw-bold">Créditos Académicos *</label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-light border-end-0"><i class="bi bi-mortarboard"></i></span>
@@ -102,8 +103,20 @@ if (isset($_GET['id'])) {
                                                    class="form-control border-start-0" 
                                                    placeholder="0" min="0" max="20" 
                                                    value="<?php echo $creditos; ?>" required>
-                                            <div class="invalid-feedback">Debe ser un número entre 0 y 20.</div>
+                                            <div class="invalid-feedback">Debe ser entre 0 y 20.</div>
                                         </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold text-primary">Carga Horaria Semanal *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-primary-subtle border-end-0 text-primary"><i class="bi bi-clock-history"></i></span>
+                                            <input type="number" name="horas_semanales" id="horasMateria" 
+                                                   class="form-control border-start-0 fw-bold" 
+                                                   placeholder="Ej. 4" min="1" max="15" 
+                                                   value="<?php echo $horas_semanales; ?>" required>
+                                            <div class="invalid-feedback">Mínimo 1 hora, máximo 15.</div>
+                                        </div>
+                                        <div class="form-text small">Indica cuántas veces se imparte esta materia a la semana.</div>
                                     </div>
                                 </div>
 
@@ -153,25 +166,27 @@ if (isset($_GET['id'])) {
       })
     })()
 
-    // 1. Convertir Código a Mayúsculas automáticamente
+    // 1. Convertir Código a Mayúsculas
     const codigoInput = document.getElementById('codigoMateria');
     codigoInput.addEventListener('input', function() {
         this.value = this.value.toUpperCase().replace(/\s/g, '');
     });
 
-    // 2. Contador de caracteres para la descripción
+    // 2. Contador de caracteres
     const textarea = document.querySelector('textarea[name="descripcion"]');
     const charCount = document.getElementById('charCount');
     textarea.addEventListener('input', function() {
         charCount.textContent = `${this.value.length} / 500`;
     });
 
-    // 3. Prevenir números negativos en créditos por teclado
-    const creditosInput = document.getElementById('creditosMateria');
-    creditosInput.addEventListener('keydown', function(e) {
-        if (e.key === '-' || e.key === 'e' || e.key === '+') {
-            e.preventDefault();
-        }
+    // 3. Validar entradas numéricas (Créditos y Horas)
+    const numericInputs = [document.getElementById('creditosMateria'), document.getElementById('horasMateria')];
+    numericInputs.forEach(input => {
+        input.addEventListener('keydown', function(e) {
+            if (['-', 'e', '+', '.'].includes(e.key)) {
+                e.preventDefault();
+            }
+        });
     });
 </script>
 
