@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartClass - Gestión Inteligente Académica</title>
+  <link href="assets/css/bootstrap.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;700&display=swap" />
+  <link rel="stylesheet" href="assets/css/estilos.css" />
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+    <div class="container">
+
+      <!-- LOGO -->
+      <a class="navbar-brand d-flex align-items-center" href="#inicio">
+        <img src="assets/img/logo.png" alt="Logo" class="me-2" style="height:64px;">
+      </a>
+
+      <!-- Botón hamburguesa -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- MENÚ -->
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-5">
+
+          <!-- Enlaces -->
+          <li class="nav-item"><a href="#productos" class="nav-link">Producto</a></li>
+          <li class="nav-item"><a href="#funciona" class="nav-link">Cómo Funciona</a></li>
+          <li class="nav-item"><a href="#trayectoria" class="nav-link">Nuestra Historia</a></li>
+          <li class="nav-item"><a href="#subscripciones" class="nav-link">Planes</a></li>
+          <li class="nav-item"><a href="#contacto" class="nav-link">Contacto</a></li>
+
+          <!-- Botones -->
+          <li class="nav-item mt-3 mt-lg-0 d-flex gap-2">
+            <a href="../../register.php" class="btn btn-color text-white px-4 shadow-sm" id="btnRegister">Registrarse</a>
+            <button class="btn btn-outline-primary" id="btnDemo">Solicitar demo</button>
+          </li>
+
+        </ul>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="inicio" class="hero inicio-section d-flex align-items-center">
+    <div class="container py-5">
+      <div class="row align-items-center">
+        <div class="col-lg-6">
+          <h1 class="display-4 fw-bold mb-3">Gestiona profesores, grupos y horarios de forma sencilla</h1>
+          <p class="lead mb-4">SmartClass centraliza toda la administración académica: creación de horarios, asignación de grupos y docentes, y notificaciones en tiempo real.</p>
+          <form id="smartLoginForm" class="row bg-light rounded m-2 p-2">
+            <div class="col-auto flex-grow-1 p-1">
+              <input 
+                type="email"
+                id="userEmail"
+                class="form-control"
+                placeholder="Ingresar correo"
+                required>
+            </div>
+            <div class="col-auto p-1">
+              <button class="btn btn-color text-white" type="submit">
+                Iniciar sesión
+              </button>
+            </div>
+          </form>
+        </div>
+        <div class="col-lg-6 text-center">
+          <img src="assets/img/image.png" class="hero-img img-principal" alt="Dashboard SmartClass" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCTO -->
+  <section id="productos" class="py-5 section-highlight">
+    <div class="container text-center">
+      <h2 class="fw-bold mb-4">SmartClass</h2>
+      <p class="text-muted mb-5">Una plataforma integral para gestionar toda la actividad académica: profesores, grupos, horarios, salones y notificaciones.</p>
+
+      <div class="row g-4">
+
+        <div class="col-md-3">
+          <div class="step-card p-4 shadow-sm h-100 position-relative">
+            <span class="material-symbols-outlined icon-top">people</span>
+            <h6 class="mt-4">Profesores</h6>
+            <p>Registra y administra todos los docentes de tu institución.</p>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="step-card p-4 shadow-sm h-100 position-relative">
+            <span class="material-symbols-outlined icon-top">groups</span>
+            <h6 class="mt-4">Grupos</h6>
+            <p>Organiza a los alumnos en grupos y asigna docentes fácilmente.</p>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="step-card p-4 shadow-sm h-100 position-relative">
+            <span class="material-symbols-outlined icon-top">meeting_room</span>
+            <h6 class="mt-4">Registrar salones</h6>
+            <p>Agrega salones con su capacidad y características para tener control de los espacios.</p>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="step-card p-4 shadow-sm h-100 position-relative">
+            <span class="material-symbols-outlined icon-top">calendar_month</span>
+            <h6 class="mt-4">Horarios</h6>
+            <p>Crea y actualiza horarios de clases en tiempo real.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CÓMO FUNCIONA -->
+  <section id="funciona" class="py-5"  style="background-color: #eaf0ff;">
+    <div class="container text-center mb-5">
+      <h2 class="fw-bold">¿Cómo funciona SmartClass?</h2>
+      <p class="text-muted">Descubre cómo nuestra plataforma facilita la gestión académica, paso a paso.</p>
+    </div>
+
+    <!-- FEATURE 1: Registrar profesores -->
+    <div class="feature-section"  style="background-color: #eaf0ff;">
+      <div class="container feature-item d-flex flex-wrap align-items-center gap-4">
+        <div class="feature-text col-lg-5">
+          <h3>Registrar profesores</h3>
+          <p>Agrega docentes con todos sus datos y asignaciones para mantener un registro completo de tu institución.</p>
+          <a href="#" class="feature-link">Ver detalles <i class="fas fa-chevron-right"></i></a>
+        </div>
+        <div class="feature-image col-lg-7 text-center">
+          <img src="assets/img/registrarProfesores.png" alt="Registrar profesores" class="responsive-img">
+        </div>
+      </div>
+    </div>
+
+    <!-- FEATURE 2: Crear grupos -->
+    <div class="feature-section"  style="background-color: #ffffff;">
+      <div class="container feature-item reverse d-flex flex-wrap align-items-center gap-4">
+        <div class="feature-text col-lg-5">
+          <h3>Crear grupos</h3>
+          <p>Organiza a los alumnos en grupos y asigna docentes responsables para cada sección fácilmente.</p>
+          <a href="#" class="feature-link">Ver detalles <i class="fas fa-chevron-right"></i></a>
+        </div>
+        <div class="feature-image col-lg-7 text-center">
+          <img src="assets/img/crearGrupos.png" alt="Crear grupos" class="responsive-img">
+        </div>
+      </div>
+    </div>
+
+    <!-- FEATURE 3: Registrar salones -->
+    <div class="feature-section"  style="background-color: #eaf0ff;">
+      <div class="container feature-item d-flex flex-wrap align-items-center gap-4">
+        <div class="feature-text col-lg-5">
+          <h3>Registrar salones</h3>
+          <p>Agrega salones con su capacidad y características para tener un control eficiente de los espacios disponibles.</p>
+          <a href="#" class="feature-link">Ver detalles <i class="fas fa-chevron-right"></i></a>
+        </div>
+        <div class="feature-image col-lg-7 text-center">
+          <img src="assets/img/registrarSalones.png" alt="Registrar salones" class="responsive-img">
+        </div>
+      </div>
+    </div>
+
+    <!-- FEATURE 4: Planificar horarios -->
+    <div class="feature-section" style="background-color: #ffffff;">
+      <div class="container feature-item reverse d-flex flex-wrap align-items-center gap-4">
+        <div class="feature-text col-lg-5">
+          <h3>Planificar horarios</h3>
+          <p>Planifica horarios de clases según disponibilidad de salones y docentes para evitar conflictos.</p>
+          <a href="#" class="feature-link">Ver detalles <i class="fas fa-chevron-right"></i></a>
+        </div>
+        <div class="feature-image col-lg-7 text-center">
+          <img src="assets/img/horarios.png" alt="Asignar horarios" class="responsive-img">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="trayectoria" class="py-5 text-center section-highlight">
+    <div class="container">
+      
+      <h2 class="fw-bold mb-5">Nuestra Historia y Principios</h2>
+      
+      <img src="assets/img/nuestraHistoria.png" alt="Equipo de SmartClass" class="rounded-circle mb-4 img-historia shadow" style="max-width:250px;">
+      
+      <p class="lead mb-5 mx-auto" style="max-width: 800px;">
+        Somos Integral Solutions, una compañía de tecnología dedicada a la innovación digital en el sector educativo. Desde 2018, trabajamos para simplificar la gestión académica y permitir que las instituciones se centren en la enseñanza.
+      </p>
+
+      <div class="row mt-4">
+        
+        <div class="col-md-4 mb-4">
+          <div class="p-4 h-100 card-principio shadow-sm">
+            <h5 class="color-smartclass fw-bold mb-3">MISIÓN</h5>
+            <p>Desarrollar soluciones tecnológicas innovadoras, eficientes y seguras que optimicen la gestión académica de nuestros clientes.</p>
+            <button class="btn btn-color text-white mt-3">ÚNETE A NUESTRO EQUIPO</button>
+          </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+          <div class="p-4 h-100 card-principio shadow-sm">
+            <h5 class="color-smartclass fw-bold mb-3">VISIÓN</h5>
+            <p>Ser líderes de soluciones tecnológicas para el sector educativo en Latinoamérica, reconocidos por nuestra excelencia y valor al cliente.</p>
+            <button class="btn btn-color text-white mt-3">VER NUESTROS PROYECTOS</button>
+          </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+          <div class="p-4 h-100 card-principio shadow-sm">
+            <h5 class="color-smartclass fw-bold mb-3">VALORES</h5>
+            <p>Excelencia en el servicio, innovación constante, integridad y optimización de recursos.</p>
+            <button class="btn btn-color text-white mt-3">CONOCER MÁS</button>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  </section>
+
+  <!-- PLANES -->
+  <section id="subscripciones" class="py-5">
+    <div class="container text-center">
+      <h2 class="fw-bold mb-4">Planes y suscripciones</h2>
+
+      <!-- BARRA DE URGENCIA -->
+      <div id="urgencyBar" class="urgency-bar rounded p-2 mb-3 d-flex justify-content-between align-items-center">
+        <div class="urgency-text">Cargando oferta...</div>
+        <div class="urgency-cta"><button class="btn btn-sm btn-outline-light" id="urgencyChoose">Elegir plan</button></div>
+      </div>
+
+      <div class="row justify-content-center g-4 mt-4">
+
+        <div class="col-md-4">
+          <div class="card shadow-sm p-3 card-fixed">
+            <img src="assets/img/basico.png" alt="Plan Básico" class="card-img-top rounded-3 mb-3">
+            <div class="card-body">
+              <h5 class="card-title-large fw-bold">Básico</h5>
+              <p>Gestión académica esencial para tu institución.</p>
+              <button class="btn btn-outline-danger w-100 plan-choose" data-plan="Basico">Elegir plan</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card shadow-sm p-3 card-fixed">
+            <img src="assets/img/premium.png" alt="Plan Premium" class="card-img-top rounded-3 mb-3">
+            <div class="card-body">
+              <h5 class="card-title-large fw-bold">Premium</h5>
+              <p>Incluye notificaciones avanzadas y panel completo de administración.</p>
+              <button class="btn btn-outline-danger w-100 plan-choose" data-plan="Premium">Elegir plan</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACTO -->
+  <section id="contacto" class="py-5">
+    <div class="container text-center">
+      <h2 class="fw-bold mb-4">Contáctanos</h2>
+      <form class="mx-auto" style="max-width: 400px;" id="contactForm">
+        <input class="form-control mb-3" id="nameInput" placeholder="Nombre" />
+        <input class="form-control mb-3" id="emailInput" placeholder="Email" />
+        <textarea class="form-control mb-3" id="messageInput" placeholder="Mensaje"></textarea>
+        <button class="btn btn-danger w-100" type="submit">Enviar</button>
+      </form>
+    </div>
+  </section>
+
+  <footer class="text-center py-4 bg-white">
+    <p class="m-0">© 2025 SmartClass. Todos los derechos reservados.</p>
+  </footer>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="assets/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/myScript.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+    function showToast(message, type = 'danger') {
+      const toast = document.createElement('div');
+      toast.className = `toast align-items-center text-bg-${type} border-0 show`;
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body">${message}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto"></button>
+        </div>
+      `;
+
+      const container = document.getElementById('toastContainer');
+      container.appendChild(toast);
+
+      toast.querySelector('.btn-close').addEventListener('click', () => {
+        toast.remove();
+      });
+
+      setTimeout(() => toast.remove(), 4000);
+    }
+
+    const form = document.getElementById('smartLoginForm');
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const emailInput = document.getElementById('userEmail');
+      const email = emailInput.value.trim().toLowerCase();
+      const submitBtn = this.querySelector('button[type="submit"]');
+
+      if (!email) {
+        showToast("Por favor ingresa un correo válido");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Validando...';
+
+      try {
+        const response = await fetch('/SmartClass/SmartClassHomePage/SmartClassHomePage/checkEmail.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+          showToast(result.message);
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Iniciar sesión';
+          return;
+        }
+
+        let targetUrl = "/SmartClass/login.php";
+
+        if (result.rol === 'alumno') {
+          targetUrl = "/SmartClass/client/login.php";
+        } else if (result.rol === 'profesor') {
+          targetUrl = "/SmartClass/client/login.php";
+        } else if (result.rol === 'admin') {
+          targetUrl = "/SmartClass/login.php";
+        }
+
+        window.location.href = targetUrl;
+
+      } catch (error) {
+        console.error(error);
+        showToast("Error al conectar con el servidor");
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Iniciar sesión';
+      }
+    });
+
+  });
+  </script>
+
+</body>
+</html>

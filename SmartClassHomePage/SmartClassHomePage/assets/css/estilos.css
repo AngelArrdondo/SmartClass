@@ -1,0 +1,243 @@
+/* =====================
+   ESTILOS BASE
+   ===================== */
+body {
+  scroll-behavior: smooth;
+  background-color: #ffffff;
+  padding-top: 80px; 
+}
+
+.btn-color {
+  font-weight: bold;
+  background-color: #f7941e;
+  transition: background-color 0.3s;
+}
+
+.btn-color:hover {
+  background-color: #fa8900;
+}
+
+/* =====================
+   SECCIONES PRINCIPALES
+   ===================== */
+.inicio-section {
+  background-color: #eaf0ff;
+  min-height: 87vh;
+  display: flex;
+  align-items: center;
+  padding-top: 0;
+}
+
+.section-highlight {
+  background-color: #eaf0ff;
+}
+
+#subscripciones,
+#contacto {
+  background-color: #eaf0ff;
+}
+
+footer {
+  background-color: #bcd3f7;
+  color: black;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* =====================
+   IMÁGENES
+   ===================== */
+.img-principal {
+  max-width: 400px;
+  width: 100%;
+}
+
+/* =====================
+   URGENCIA / TOASTS
+   ===================== */
+.urgency-bar {
+  background: linear-gradient(90deg,#ffb86b,#f7941e);
+  color: #fff;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.urgency-cta .btn {
+  border-color: rgba(255,255,255,0.3);
+  color: #fff;
+}
+
+.toast-container {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1080;
+}
+
+.toast {
+  background: #222;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 6px 22px rgba(0,0,0,0.2);
+  opacity: 0.98;
+  transition: all 0.6s ease;
+}
+.toast.success { background: #1b8a3e; }
+.toast.error { background: #b32b2b; }
+
+/* =====================
+   NAV LINKS
+   ===================== */
+.navbar .nav-link.active {
+  color: #f7941e;
+  font-weight: 700;
+}
+
+/* =====================
+   STEP CARDS
+   ===================== */
+.step-card {
+  border: 2px solid transparent;
+  border-radius: 12px;
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+}
+
+.step-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 6px 30px rgba(0, 74, 173, 0.12);
+  border-color: #f7941e;
+}
+
+.step-card .icon-top {
+  font-size: 48px;
+  color: #f7941e;
+}
+
+/* =====================
+   CÓMO FUNCIONA
+   ===================== */
+.feature-section {
+  padding: 60px 0;
+}
+
+.feature-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2rem;
+}
+
+.feature-item.reverse {
+  flex-direction: row-reverse;
+}
+
+.feature-image .responsive-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+.feature-text h2 {
+  font-size: 1.75rem;
+  color: #004aad;
+  margin-bottom: 15px;
+}
+
+.feature-text p {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.feature-link {
+  font-weight: 600;
+  color: #f7941e;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.feature-link:hover {
+  color: #fa8900;
+  text-decoration: underline;
+}
+
+.feature-image {
+  max-width: 550px; 
+  width: 100%; 
+  text-align: center;
+}
+
+.feature-image .responsive-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+/* =====================
+   PLANES / SUSCRIPCIONES
+   ===================== */
+.card-fixed {
+  border: 2px solid transparent;
+  border-radius: 12px;
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+}
+
+.card-fixed:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 6px 30px rgba(0, 74, 173, 0.12);
+  border-color: #f7941e;
+}
+
+/* =====================
+   NUESTRA TRAYECTORIA
+   ===================== */
+#trayectoria {
+  padding: 60px 0;
+}
+
+.img-historia {
+  border: 4px solid #f7941e; 
+}
+
+.card-principio {
+  border: 1px solid #d4e0ff;
+  border-radius: 12px;
+  background-color: #fff;
+  transition: transform 0.3s, box-shadow 0.3s;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-principio:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* =====================
+   ADAPTATIVOS
+   ===================== */
+@media (max-width: 992px) {
+  .feature-item,
+  .feature-item.reverse {
+    flex-direction: column;
+    text-align: center;
+  }
+  .feature-text h2 { font-size: 1.5rem; }
+  .feature-text p { font-size: 0.95rem; }
+  .feature-link { font-size: 0.95rem; }
+}
+
+@media (max-width: 576px) {
+  .img-principal { max-width: 100%; }
+  .feature-text h2 { font-size: 1.25rem; }
+  .feature-text p { font-size: 0.85rem; }
+  .feature-link { font-size: 0.85rem; }
+  .feature-item { gap: 1rem; }
+}

@@ -135,7 +135,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
           <div class="text-center text-muted small">
             <p class="mb-2">¿Olvidaste tu contraseña? Contacta a tu coordinador.</p>
-            <a href="../index.php" class="text-decoration-none text-secondary">Volver al inicio</a>
+            <a href="/SmartClass/SmartClassHomePage/SmartClassHomePage/index1.html"
+              class="text-decoration-none text-secondary">
+              Volver al inicio
+            </a>
           </div>
         </form>
       </div>
