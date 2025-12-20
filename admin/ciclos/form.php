@@ -2,7 +2,6 @@
 session_start();
 require_once '../../config/db.php';
 
-// Seguridad
 if (!isset($_SESSION['loggedin']) || $_SESSION['role_id'] != 1) {
     header("location: ../../login.php");
     exit;
@@ -11,7 +10,6 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['role_id'] != 1) {
 $modo_edicion = false;
 $titulo = "Nuevo Ciclo Escolar";
 $btn_texto = "Crear Periodo";
-
 $id = ""; $nombre = ""; $fecha_inicio = ""; $fecha_fin = ""; $activo = "0"; 
 
 if (isset($_GET['id'])) {
@@ -20,10 +18,9 @@ if (isset($_GET['id'])) {
     $btn_texto = "Guardar Cambios";
     $id = $_GET['id'];
     
-    // Consulta preparada para evitar Inyección SQL
     $sql = "SELECT * FROM ciclos_escolares WHERE id = ?";
     if ($stmt = mysqli_prepare($conn, $sql)) {
-        mysqli_stmt_bind_param($stmt, "i", $id); // Se agregó la variable $id aquí
+        mysqli_stmt_bind_param($stmt, "i", $id);
         mysqli_stmt_execute($stmt);
         $resultado = mysqli_stmt_get_result($stmt);
         if ($fila = mysqli_fetch_assoc($resultado)) {
@@ -62,7 +59,6 @@ if (isset($_GET['id'])) {
                 <div class="col-lg-10"> 
                     <div class="card border-0 shadow-sm rounded-4">
                         <div class="card-body p-4">
-                            
                             <form action="save_ciclo.php" method="POST" class="needs-validation" novalidate>
                                 <input type="hidden" name="id" value="<?php echo $id; ?>">
 
@@ -106,21 +102,14 @@ if (isset($_GET['id'])) {
                                 </div>
 
                                 <h5 class="text-secondary fw-bold mb-4 border-bottom pb-2">2. Vigencia en Calendario</h5>
-                                
                                 <div class="row g-3 mb-4">
                                     <div class="col-md-6">
                                         <label class="form-label small fw-bold">Fecha de Inicio Real *</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-light"><i class="bi bi-calendar-play"></i></span>
-                                            <input type="date" name="fecha_inicio" class="form-control" value="<?php echo $fecha_inicio; ?>" required>
-                                        </div>
+                                        <input type="date" name="fecha_inicio" class="form-control" value="<?php echo $fecha_inicio; ?>" required>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label small fw-bold">Fecha de Cierre Real *</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-light"><i class="bi bi-calendar-check"></i></span>
-                                            <input type="date" name="fecha_fin" class="form-control" value="<?php echo $fecha_fin; ?>" required>
-                                        </div>
+                                        <input type="date" name="fecha_fin" class="form-control" value="<?php echo $fecha_fin; ?>" required>
                                     </div>
                                 </div>
 
@@ -130,7 +119,6 @@ if (isset($_GET['id'])) {
                                         <i class="bi bi-save me-2"></i> <?php echo $btn_texto; ?>
                                     </button>
                                 </div>
-
                             </form>
                         </div>
                     </div>
@@ -141,7 +129,6 @@ if (isset($_GET['id'])) {
 </div>
 
 <script>
-    // Configuración de los periodos (Idéntica a tu requerimiento)
     const opcionesPeriodos = {
         "Semestre": ["Enero - Junio", "Julio - Diciembre"],
         "Cuatrimestre": ["Enero - Abril", "Mayo - Agosto", "Septiembre - Diciembre"],
@@ -157,7 +144,6 @@ if (isset($_GET['id'])) {
     esquemaSelect.addEventListener('change', function() {
         const esquema = this.value;
         rangoSelect.innerHTML = '<option value="">Seleccione rango...</option>';
-        
         if (esquema && opcionesPeriodos[esquema]) {
             rangoSelect.disabled = false;
             opcionesPeriodos[esquema].forEach(rango => {
@@ -175,13 +161,33 @@ if (isset($_GET['id'])) {
     function actualizarNombre() {
         if (rangoSelect.value && anioInput.value) {
             nombreOficial.value = `${rangoSelect.value} ${anioInput.value}`;
-        } else {
-            nombreOficial.value = "";
         }
     }
 
     rangoSelect.addEventListener('change', actualizarNombre);
     anioInput.addEventListener('input', actualizarNombre);
+
+    // --- LÓGICA DE REUPERACIÓN DE DATOS AL EDITAR ---
+    window.addEventListener('load', () => {
+        const nombreGuardado = "<?php echo $nombre; ?>";
+        if (nombreGuardado) {
+            const partes = nombreGuardado.split(' ');
+            const anio = partes.pop();
+            const rango = partes.join(' ');
+
+            // Buscar a qué esquema pertenece el rango
+            for (const esquema in opcionesPeriodos) {
+                if (opcionesPeriodos[esquema].includes(rango)) {
+                    esquemaSelect.value = esquema;
+                    // Forzar el llenado del select de rangos
+                    esquemaSelect.dispatchEvent(new Event('change'));
+                    rangoSelect.value = rango;
+                    anioInput.value = anio;
+                    break;
+                }
+            }
+        }
+    });
 
     // Validación de Bootstrap
     (function () {
@@ -197,14 +203,6 @@ if (isset($_GET['id'])) {
         }, false)
       })
     })()
-
-    // Sidebar Toggle
-    const toggleBtn = document.getElementById('btnToggleSidebar');
-    if(toggleBtn){
-        toggleBtn.addEventListener('click', () => {
-             document.getElementById('wrapper').classList.toggle('toggled');
-        });
-    }
 </script>
 </body>
 </html>
