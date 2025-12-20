@@ -1,3 +1,3 @@
 <?php
-header("Location: login.php");
-exit;
+require_once __DIR__ . '/login.php';
+?>
