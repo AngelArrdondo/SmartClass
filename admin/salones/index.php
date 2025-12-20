@@ -2,13 +2,23 @@
 session_start();
 require_once '../../config/db.php';
 
-// Seguridad
+// 1. SEGURIDAD
 if (!isset($_SESSION['loggedin']) || $_SESSION['role_id'] != 1) {
     header("location: ../../login.php");
     exit;
 }
 
-// CONSULTA: Traemos todos los salones
+// --- AGREGACIÓN: Obtener la foto del administrador logueado ---
+$user_id = $_SESSION['user_id'];
+$query_user = mysqli_query($conn, "SELECT foto FROM users WHERE id = $user_id");
+$user_data = mysqli_fetch_assoc($query_user);
+
+// Subimos dos niveles (../../) para llegar a assets desde admin/salones/
+$base_img_path = "../../assets/img/";
+$foto_perfil = !empty($user_data['foto']) ? $base_img_path . "profiles/" . $user_data['foto'] : $base_img_path . "avatar.png";
+// --------------------------------------------------------------
+
+// 2. CONSULTA SQL
 $sql = "SELECT * FROM salones ORDER BY codigo ASC";
 $result = mysqli_query($conn, $sql);
 $total_registros = mysqli_num_rows($result);
@@ -29,18 +39,13 @@ $total_registros = mysqli_num_rows($result);
             width: 40px; height: 40px;
             background-color: #f0f7ff; color: #0d6efd;
             display: flex; align-items: center; justify-content: center;
-            border-radius: 50%;
+            border-radius: 12px; /* Esquinas ligeramente redondeadas para salones */
         }
         .table-hover tbody tr:hover {
             background-color: rgba(13, 110, 253, 0.02);
         }
-        /* Estilo para salones inactivos */
-        .fila-mantenimiento {
-            background-color: #f8f9fa;
-        }
-        .fila-mantenimiento .icon-circle {
-            background-color: #e9ecef; color: #6c757d;
-        }
+        .fila-mantenimiento { background-color: #fcfcfc; }
+        .fila-mantenimiento .icon-circle { background-color: #e9ecef; color: #6c757d; }
     </style>
 </head>
 <body class="bg-light">
@@ -60,10 +65,10 @@ $total_registros = mysqli_num_rows($result);
                 </div>
                 <div class="d-flex align-items-center">
                     <div class="text-end me-3 d-none d-sm-block">
-                        <div class="small fw-bold"><?php echo $_SESSION['user_name'] ?? 'Admin'; ?></div>
+                        <div class="small fw-bold"><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Admin'); ?></div>
                         <div class="text-muted small" style="font-size: 0.75rem;">Administrador</div>
                     </div>
-                    <img src="../../assets/img/avatar.png" alt="Admin" class="rounded-circle border" width="38" height="38">
+                    <img src="<?php echo $foto_perfil; ?>" alt="Admin" class="rounded-circle border" width="38" height="38" style="object-fit: cover;">
                 </div>
             </div>
         </nav>
@@ -114,14 +119,12 @@ $total_registros = mysqli_num_rows($result);
                             </tr>
                         </thead>
                         <tbody id="tablaSalones">
-                            <?php 
-                            if ($total_registros == 0) {
-                                echo '<tr><td colspan="5" class="text-center py-5 text-muted">No hay salones registrados.</td></tr>';
-                            }
+                            <?php if ($total_registros == 0): ?>
+                                <tr><td colspan="5" class="text-center py-5 text-muted">No hay salones registrados.</td></tr>
+                            <?php endif; ?>
 
-                            while ($row = mysqli_fetch_assoc($result)): 
+                            <?php while ($row = mysqli_fetch_assoc($result)): 
                                 $recursos_array = !empty($row['recursos']) ? explode(',', $row['recursos']) : [];
-                                // Lógica de estado
                                 $esta_activo = $row['is_active'] == 1;
                                 $clase_fila = !$esta_activo ? 'fila-mantenimiento text-muted' : '';
                             ?>
@@ -197,17 +200,18 @@ $total_registros = mysqli_num_rows($result);
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    const toggleBtn = document.getElementById('btnToggleSidebar');
-    if(toggleBtn){
-        toggleBtn.addEventListener('click', () => {
-             document.getElementById('wrapper').classList.toggle('toggled');
-        });
-    }
+    // Sidebar Toggle
+    document.getElementById('btnToggleSidebar')?.addEventListener('click', () => {
+        document.getElementById('wrapper').classList.toggle('toggled');
+    });
 
+    // Buscador en Tiempo Real
     document.getElementById('buscador').addEventListener('keyup', function() {
         let valor = this.value.toLowerCase();
         let filas = document.querySelectorAll('#tablaSalones tr');
         filas.forEach(fila => {
+            // Saltamos la fila de "No hay registros" si existe
+            if(fila.cells.length < 2) return;
             let contenido = fila.textContent.toLowerCase();
             fila.style.display = contenido.includes(valor) ? '' : 'none';
         });

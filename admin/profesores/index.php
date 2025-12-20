@@ -24,7 +24,7 @@ if ($filtro_estado == 'activos') {
 // 2. CONSULTA SQL
 $sql = "
     SELECT p.id as profe_id, p.codigo_empleado, p.especialidad,
-           u.nombre, u.apellido_paterno, u.apellido_materno, u.email, u.telefono, u.is_active
+           u.nombre, u.apellido_paterno, u.apellido_materno, u.email, u.telefono, u.is_active, u.foto
     FROM profesores p
     INNER JOIN users u ON p.user_id = u.id
     $condicion_sql
@@ -33,6 +33,15 @@ $sql = "
 
 $result = mysqli_query($conn, $sql);
 $total_registros = mysqli_num_rows($result);
+// --- NUEVO: Obtener la foto del administrador logueado ---
+$user_id = $_SESSION['user_id'];
+$query_user = mysqli_query($conn, "SELECT foto FROM users WHERE id = $user_id");
+$user_data = mysqli_fetch_assoc($query_user);
+
+// Subimos dos niveles (../../) para llegar a assets desde admin/profesores/
+$base_img_path = "../../assets/img/";
+$foto_perfil = !empty($user_data['foto']) ? $base_img_path . "profiles/" . $user_data['foto'] : $base_img_path . "avatar.png";
+// ---------------------------------------------------------
 ?>
 
 <!DOCTYPE html>
@@ -79,10 +88,10 @@ $total_registros = mysqli_num_rows($result);
                 </div>
                 <div class="d-flex align-items-center">
                     <div class="text-end me-3 d-none d-sm-block">
-                        <div class="small fw-bold"><?php echo $_SESSION['user_name'] ?? 'Admin'; ?></div>
+                        <div class="small fw-bold"><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Admin'); ?></div>
                         <div class="text-muted small" style="font-size: 0.75rem;">Administrador</div>
                     </div>
-                    <img src="../../assets/img/avatar.png" alt="Admin" class="rounded-circle border" width="38" height="38">
+                    <img src="<?php echo $foto_perfil; ?>" alt="Admin" class="rounded-circle border" width="38" height="38" style="object-fit: cover;">
                 </div>
             </div>
         </nav>
@@ -148,23 +157,29 @@ $total_registros = mysqli_num_rows($result);
                                     <td colspan="6" class="text-center py-5 text-muted">No se encontraron profesores.</td>
                                 </tr>
                             <?php endif; ?>
-
                             <?php while ($row = mysqli_fetch_assoc($result)): 
                                 $nombre_completo = $row['nombre'] . ' ' . $row['apellido_paterno'] . ' ' . $row['apellido_materno'];
                                 $iniciales = strtoupper(substr($row['nombre'], 0, 1) . substr($row['apellido_paterno'], 0, 1));
                                 $opacity_class = ($row['is_active'] == 0) ? 'text-muted' : '';
+                                
+                                // --- NUEVO: Lógica para la foto del profesor en la lista ---
+                                $foto_profe_lista = !empty($row['foto']) ? "../../assets/img/profiles/" . $row['foto'] : "../../assets/img/avatar.png";
                             ?>
                             <tr class="<?php echo $opacity_class; ?>">
                                 <td class="ps-4">
                                     <div class="d-flex align-items-center">
-                                        <div class="avatar-circle me-3"><?php echo $iniciales; ?></div>
+                                        <img src="<?php echo $foto_profe_lista; ?>" 
+                                            alt="Foto" 
+                                            class="rounded-circle me-3 border shadow-sm" 
+                                            width="42" height="42" 
+                                            style="object-fit: cover;">
                                         <div>
                                             <div class="fw-bold mb-0 text-dark"><?php echo $nombre_completo; ?></div>
                                             <small class="text-muted"><?php echo $row['email']; ?></small>
                                         </div>
                                     </div>
                                 </td>
-                                
+                                                            
                                 <td><code class="fw-bold text-dark"><?php echo $row['codigo_empleado']; ?></code></td>
                                 
                                 <td>
@@ -172,11 +187,19 @@ $total_registros = mysqli_num_rows($result);
                                         <?php echo $row['especialidad']; ?>
                                     </span>
                                 </td>
-                                
                                 <td>
-                                    <div class="small"><i class="bi bi-telephone me-1"></i> <?php echo $row['telefono'] ?: 'N/A'; ?></div>
+                                    <div class="small">
+                                        <?php if($row['telefono']): ?>
+                                            <a href="https://wa.me/<?php echo preg_replace('/\D/', '', $row['telefono']); ?>" 
+                                            target="_blank" 
+                                            class="text-decoration-none text-success fw-medium">
+                                                <i class="bi bi-whatsapp me-1"></i> <?php echo $row['telefono']; ?>
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="text-muted">N/A</span>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
-                                
                                 <td class="text-center">
                                     <?php if($row['is_active'] == 1): ?>
                                         <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3">Activo</span>

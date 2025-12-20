@@ -1,14 +1,17 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 require_once '../../config/db.php';
 
-// 1. SEGURIDAD
+// Seguridad: Solo Admin
 if (!isset($_SESSION['loggedin']) || $_SESSION['role_id'] != 1) {
     header("location: ../../login.php");
     exit;
 }
 
-// 2. LÓGICA DE FILTRADO
+// 1. LÓGICA DE FILTRADO
 $filtro_estado = isset($_GET['filtro']) ? $_GET['filtro'] : 'activos'; 
 $condicion_sql = "";
 
@@ -16,14 +19,13 @@ if ($filtro_estado == 'activos') {
     $condicion_sql = "WHERE u.is_active = 1";
 } elseif ($filtro_estado == 'inactivos') {
     $condicion_sql = "WHERE u.is_active = 0";
-} 
+}
 
-// 3. CONSULTA SQL MEJORADA
+// 2. CONSULTA SQL (Incluyendo foto del alumno y nombre del grupo)
 $sql = "
-    SELECT 
-        a.id as alumno_id, a.matricula, 
-        u.nombre, u.apellido_paterno, u.apellido_materno, u.email, u.telefono, u.is_active,
-        g.codigo as nombre_grupo
+    SELECT a.id as alumno_id, a.matricula, 
+           u.nombre, u.apellido_paterno, u.apellido_materno, u.email, u.telefono, u.is_active, u.foto,
+           g.codigo as nombre_grupo
     FROM alumnos a
     INNER JOIN users u ON a.user_id = u.id
     LEFT JOIN grupos g ON a.grupo_id = g.id
@@ -33,6 +35,14 @@ $sql = "
 
 $result = mysqli_query($conn, $sql);
 $total_registros = mysqli_num_rows($result);
+
+// --- Obtener la foto del administrador logueado ---
+$user_id = $_SESSION['user_id'];
+$query_user = mysqli_query($conn, "SELECT foto FROM users WHERE id = $user_id");
+$user_data = mysqli_fetch_assoc($query_user);
+
+$base_img_path = "../../assets/img/";
+$foto_perfil = !empty($user_data['foto']) ? $base_img_path . "profiles/" . $user_data['foto'] : $base_img_path . "avatar.png";
 ?>
 
 <!DOCTYPE html>
@@ -41,21 +51,11 @@ $total_registros = mysqli_num_rows($result);
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Directorio de Alumnos | SmartClass</title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="../../assets/css/styles.css" rel="stylesheet">
     <style>
-        .avatar-circle {
-            width: 40px;
-            height: 40px;
-            background-color: #e9ecef;
-            color: #0d6efd;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            border-radius: 50%;
-        }
         .table-hover tbody tr:hover {
             background-color: rgba(13, 110, 253, 0.02);
         }
@@ -64,7 +64,7 @@ $total_registros = mysqli_num_rows($result);
 <body class="bg-light">
 
 <div class="d-flex" id="wrapper">
-    <?php require_once __DIR__ . '/../../includes/menu.php' ?>
+    <?php require_once __DIR__ . '/../../includes/menu.php'; ?>
 
     <div id="page-content" class="w-100">
         
@@ -78,16 +78,16 @@ $total_registros = mysqli_num_rows($result);
                 </div>
                 <div class="d-flex align-items-center">
                     <div class="text-end me-3 d-none d-sm-block">
-                        <div class="small fw-bold"><?php echo $_SESSION['user_name']; ?></div>
+                        <div class="small fw-bold"><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Admin'); ?></div>
                         <div class="text-muted small" style="font-size: 0.75rem;">Administrador</div>
                     </div>
-                    <img src="../../assets/img/avatar.png" alt="Admin" class="rounded-circle border" width="38" height="38">
+                    <img src="<?php echo $foto_perfil; ?>" alt="Admin" class="rounded-circle border" width="38" height="38" style="object-fit: cover;">
                 </div>
             </div>
         </nav>
 
         <main class="container-fluid p-4">
-
+            
             <?php if(isset($_GET['msg'])): ?>
                 <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
                     <i class="bi bi-check-circle-fill me-2"></i>
@@ -98,12 +98,12 @@ $total_registros = mysqli_num_rows($result);
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
-            
+
             <div class="card border-0 shadow-sm mb-4 rounded-4">
                 <div class="card-body p-3">
                     <div class="row g-3 align-items-center">
                         <div class="col-md-3">
-                            <form action="" method="GET" id="formFiltro">
+                            <form action="" method="GET">
                                 <label class="small text-muted fw-bold text-uppercase">Estado</label>
                                 <select name="filtro" class="form-select border-0 bg-light" onchange="this.form.submit()">
                                     <option value="activos" <?php if($filtro_estado=='activos') echo 'selected'; ?>>🟢 Solo Activos</option>
@@ -116,7 +116,7 @@ $total_registros = mysqli_num_rows($result);
                             <label class="small text-muted fw-bold text-uppercase">Búsqueda rápida</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-0"><i class="bi bi-search text-muted"></i></span>
-                                <input type="text" id="buscador" class="form-control bg-light border-0" placeholder="Nombre, correo o matrícula...">
+                                <input type="text" id="buscador" class="form-control bg-light border-0" placeholder="Nombre, matrícula o correo...">
                             </div>
                         </div>
                         <div class="col-md-3 text-md-end pt-3 pt-md-0">
@@ -144,29 +144,32 @@ $total_registros = mysqli_num_rows($result);
                         <tbody id="tablaAlumnos">
                             <?php if ($total_registros == 0): ?>
                                 <tr>
-                                    <td colspan="6" class="text-center py-5">
-                                        <i class="bi bi-person-x text-muted" style="font-size: 3rem;"></i>
-                                        <p class="mt-3 text-muted">No se encontraron alumnos con el filtro seleccionado.</p>
-                                    </td>
+                                    <td colspan="6" class="text-center py-5 text-muted">No se encontraron alumnos.</td>
                                 </tr>
                             <?php endif; ?>
 
                             <?php while ($row = mysqli_fetch_assoc($result)): 
                                 $nombre_completo = $row['nombre'] . ' ' . $row['apellido_paterno'] . ' ' . $row['apellido_materno'];
-                                $iniciales = strtoupper(substr($row['nombre'], 0, 1) . substr($row['apellido_paterno'], 0, 1));
-                                $clase_inactivo = ($row['is_active'] == 0) ? 'text-muted' : '';
+                                $opacity_class = ($row['is_active'] == 0) ? 'text-muted' : '';
+                                $foto_alumno = !empty($row['foto']) ? "../../assets/img/profiles/" . $row['foto'] : "../../assets/img/avatar.png";
                             ?>
-                            <tr class="<?php echo $clase_inactivo; ?>">
+                            <tr class="<?php echo $opacity_class; ?>">
                                 <td class="ps-4">
                                     <div class="d-flex align-items-center">
-                                        <div class="avatar-circle me-3"><?php echo $iniciales; ?></div>
+                                        <img src="<?php echo $foto_alumno; ?>" 
+                                            alt="Foto" 
+                                            class="rounded-circle me-3 border shadow-sm" 
+                                            width="42" height="42" 
+                                            style="object-fit: cover;">
                                         <div>
-                                            <div class="fw-bold mb-0"><?php echo $nombre_completo; ?></div>
+                                            <div class="fw-bold mb-0 text-dark"><?php echo $nombre_completo; ?></div>
                                             <small class="text-muted"><?php echo $row['email']; ?></small>
                                         </div>
                                     </div>
                                 </td>
+                                                            
                                 <td><code class="fw-bold text-dark"><?php echo $row['matricula']; ?></code></td>
+                                
                                 <td>
                                     <?php if($row['nombre_grupo']): ?>
                                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3">
@@ -176,9 +179,21 @@ $total_registros = mysqli_num_rows($result);
                                         <span class="small text-muted italic">No asignado</span>
                                     <?php endif; ?>
                                 </td>
+                                
                                 <td>
-                                    <div class="small"><i class="bi bi-telephone me-1"></i> <?php echo $row['telefono'] ?: 'N/A'; ?></div>
+                                    <div class="small">
+                                        <?php if($row['telefono']): ?>
+                                            <a href="https://wa.me/<?php echo preg_replace('/\D/', '', $row['telefono']); ?>" 
+                                            target="_blank" 
+                                            class="text-decoration-none text-success fw-medium">
+                                                <i class="bi bi-whatsapp me-1"></i> <?php echo $row['telefono']; ?>
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="text-muted">N/A</span>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
+                                
                                 <td class="text-center">
                                     <?php if($row['is_active'] == 1): ?>
                                         <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3">Activo</span>
@@ -186,6 +201,7 @@ $total_registros = mysqli_num_rows($result);
                                         <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-3">Baja</span>
                                     <?php endif; ?>
                                 </td>
+                                
                                 <td class="text-end pe-4">
                                     <a href="form.php?id=<?php echo $row['alumno_id']; ?>" class="btn btn-sm btn-outline-primary rounded-circle" title="Editar">
                                         <i class="bi bi-pencil"></i>
@@ -197,7 +213,7 @@ $total_registros = mysqli_num_rows($result);
                     </table>
                 </div>
                 <div class="card-footer bg-white border-top-0 py-3">
-                    <small class="text-muted">Mostrando <strong><?php echo $total_registros; ?></strong> alumnos.</small>
+                    <small class="text-muted">Mostrando <strong><?php echo $total_registros; ?></strong> registros.</small>
                 </div>
             </div>
 
@@ -207,7 +223,7 @@ $total_registros = mysqli_num_rows($result);
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Toggle Sidebar
+    // Sidebar Toggle
     const toggleBtn = document.getElementById('btnToggleSidebar');
     if(toggleBtn){
         toggleBtn.addEventListener('click', () => {
@@ -219,7 +235,6 @@ $total_registros = mysqli_num_rows($result);
     document.getElementById('buscador').addEventListener('keyup', function() {
         let valor = this.value.toLowerCase();
         let filas = document.querySelectorAll('#tablaAlumnos tr');
-        
         filas.forEach(fila => {
             let contenido = fila.textContent.toLowerCase();
             fila.style.display = contenido.includes(valor) ? '' : 'none';

@@ -102,6 +102,14 @@ if ($num_conflictos > 0) {
 }
 
 $nombre_usuario = $_SESSION['user_name'] ?? 'Administrador';
+// Obtener la foto del usuario actual
+$user_id = $_SESSION['user_id'];
+$query_user = mysqli_query($conn, "SELECT foto FROM users WHERE id = $user_id");
+$user_data = mysqli_fetch_assoc($query_user);
+
+// Determinar la ruta de la imagen
+// Si el campo foto no está vacío, usamos la ruta de la carpeta profiles
+$foto_perfil = !empty($user_data['foto']) ? "../assets/img/profiles/" . $user_data['foto'] : "../assets/img/avatar.png";
 ?> 
 
 <!DOCTYPE html>
@@ -135,10 +143,10 @@ $nombre_usuario = $_SESSION['user_name'] ?? 'Administrador';
                     <span class="d-block fw-bold small"><?php echo $nombre_usuario; ?></span>
                     <span class="d-block text-muted small" style="font-size: 0.75rem;">Administrador</span>
                 </div>
-                <img src="../assets/img/avatar.png" alt="Admin" class="rounded-circle border" width="40" height="40">
+                <img src="<?php echo $foto_perfil; ?>" alt="Admin" class="rounded-circle border" width="40" height="40" style="object-fit: cover;">
               </a>
               <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                <li><a class="dropdown-item" href="#">Mi Perfil</a></li>
+                <li><a class="dropdown-item" href="perfil.php">Mi Perfil</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item text-danger" href="../logout.php">Salir</a></li>
               </ul>

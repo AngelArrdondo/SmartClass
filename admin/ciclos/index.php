@@ -15,6 +15,16 @@ if ($_SESSION['role_id'] != 1) {
     exit;
 }
 
+// --- NUEVO: Obtener la foto del admin ---
+$user_id = $_SESSION['user_id'];
+$query_user = mysqli_query($conn, "SELECT foto FROM users WHERE id = $user_id");
+$user_data = mysqli_fetch_assoc($query_user);
+
+// Subimos dos niveles (../../) para llegar a assets desde admin/ciclos/
+$base_img_path = "../../assets/img/";
+$foto_perfil = !empty($user_data['foto']) ? $base_img_path . "profiles/" . $user_data['foto'] : $base_img_path . "avatar.png";
+// ---------------------------------------
+
 // 2. Consulta a la Base de Datos
 $sql = "SELECT * FROM ciclos_escolares ORDER BY activo DESC, fecha_inicio DESC";
 $result = mysqli_query($conn, $sql);
@@ -70,7 +80,7 @@ $total_registros = mysqli_num_rows($result);
                         <div class="small fw-bold"><?php echo $_SESSION['user_name'] ?? 'Admin'; ?></div>
                         <div class="text-muted small" style="font-size: 0.75rem;">Administrador</div>
                     </div>
-                    <img src="../../assets/img/avatar.png" alt="Admin" class="rounded-circle border" width="38" height="38">
+                    <img src="<?php echo $foto_perfil; ?>" alt="Admin" class="rounded-circle border" width="38" height="38" style="object-fit: cover;">
                 </div>
             </div>
         </nav>
