@@ -23,10 +23,12 @@ class SmartTheme {
         centerTitle: true,
         titleTextStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
       ),
-      cardTheme: CardTheme(
-        elevation: 4, 
+      cardTheme: CardThemeData(
+        elevation: 4,
         shadowColor: blue600.withOpacity(0.1),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       ),
       inputDecorationTheme: InputDecorationTheme(
