@@ -266,7 +266,7 @@ $foto_perfil = !empty($user_data['foto']) ? "../assets/img/profiles/" . $user_da
                                 </a>
                             </div>
                             <div class="col-md-3 col-6 mb-3">
-                                <a href="reportes.php" class="btn btn-outline-light text-dark border p-3 w-100 h-100 d-flex flex-column align-items-center gap-2 hover-shadow">
+                                <a href="reportes/index.php" class="btn btn-outline-light text-dark border p-3 w-100 h-100 d-flex flex-column align-items-center gap-2 hover-shadow">
                                     <i class="bi bi-file-earmark-pdf fs-2 text-secondary"></i>
                                     <span class="small fw-bold">Reportes</span>
                                 </a>
