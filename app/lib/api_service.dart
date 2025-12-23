@@ -8,7 +8,7 @@ class ApiService {
   // ==============================
   static String get baseUrl {
     if (kIsWeb) return "http://localhost:8000";
-    return "http://192.168.1.71:8000"; // TU FASTAPI EN SAME WIFI
+    return "http://192.168.0.6:8000"; // TU FASTAPI EN SAME WIFI
   }
 
   // ==============================
@@ -50,6 +50,24 @@ class ApiService {
       }
 
       return {"success": false, "message": "Error al obtener horario"};
+    } catch (e) {
+      return {"success": false, "message": "Error: $e"};
+    }
+  }
+  // ==============================
+  // DATOS DEL ALUMNO
+  // ==============================
+  static Future<Map<String, dynamic>> getAlumnoData(int perfilId) async {
+    final url = Uri.parse("$baseUrl/api/alumnos/$perfilId");
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+
+      return {"success": false, "message": "Error al obtener datos del alumno"};
     } catch (e) {
       return {"success": false, "message": "Error: $e"};
     }

@@ -17,10 +17,11 @@ dependencies:
   http: ^1.6.0
 
   # 🔐 Guardar sesión local (id, rol, token, etc.)
-  shared_preferences: ^2.3.3
+  shared_preferences: ^2.5.4
 
   # ⏰ Manejo de fechas y formatos
   intl: ^0.20.2
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:
@@ -30,3 +31,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/img/logo.png

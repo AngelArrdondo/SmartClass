@@ -288,84 +288,101 @@
 
   <script src="assets/js/bootstrap.bundle.min.js"></script>
   <script src="assets/js/myScript.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
+<script>
+document.addEventListener('DOMContentLoaded', () => {
 
-    function showToast(message, type = 'danger') {
-      const toast = document.createElement('div');
-      toast.className = `toast align-items-center text-bg-${type} border-0 show`;
-      toast.innerHTML = `
-        <div class="d-flex">
-          <div class="toast-body">${message}</div>
-          <button type="button" class="btn-close btn-close-white me-2 m-auto"></button>
-        </div>
-      `;
+  function showToast(message, type = 'danger') {
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-bg-${type} border-0 show`;
+    toast.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">${message}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto"></button>
+      </div>
+    `;
+    document.getElementById('toastContainer').appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+  }
 
-      const container = document.getElementById('toastContainer');
-      container.appendChild(toast);
+  function isMobile() {
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  }
 
-      toast.querySelector('.btn-close').addEventListener('click', () => {
-        toast.remove();
-      });
+  const form = document.getElementById('smartLoginForm');
 
-      setTimeout(() => toast.remove(), 4000);
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById('userEmail').value.trim().toLowerCase();
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    if (!email) {
+      showToast("Por favor ingresa un correo válido");
+      return;
     }
 
-    const form = document.getElementById('smartLoginForm');
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'Validando...';
 
-    form.addEventListener('submit', async function (e) {
-      e.preventDefault();
+    try {
+      const response = await fetch('http://192.168.0.6:8000/api/check-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
 
-      const emailInput = document.getElementById('userEmail');
-      const email = emailInput.value.trim().toLowerCase();
-      const submitBtn = this.querySelector('button[type="submit"]');
+      const result = await response.json();
+      console.log("RESPUESTA API:", result);
 
-      if (!email) {
-        showToast("Por favor ingresa un correo válido");
+      if (!result.success) {
+        showToast(result.message);
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Iniciar sesión';
         return;
       }
 
-      submitBtn.disabled = true;
-      submitBtn.innerText = 'Validando...';
+      const rol = (result.rol || '').toLowerCase().trim();
+      console.log("ROL:", rol);
 
-      try {
-        const response = await fetch('/SmartClass/SmartClassHomePage/SmartClassHomePage/checkEmail.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
-        });
-
-        const result = await response.json();
-
-        if (!result.success) {
-          showToast(result.message);
-          submitBtn.disabled = false;
-          submitBtn.innerText = 'Iniciar sesión';
-          return;
-        }
-
-        let targetUrl = "/SmartClass/login.php";
-
-        if (result.rol === 'alumno') {
-          targetUrl = "/SmartClass/client/login.php";
-        } else if (result.rol === 'profesor') {
-          targetUrl = "/SmartClass/client/login.php";
-        } else if (result.rol === 'admin') {
-          targetUrl = "/SmartClass/login.php";
-        }
-
-        window.location.href = targetUrl;
-
-      } catch (error) {
-        console.error(error);
-        showToast("Error al conectar con el servidor");
-        submitBtn.disabled = false;
-        submitBtn.innerText = 'Iniciar sesión';
+      // 👉 ADMIN → PHP
+      if (rol === 'admin') {
+        window.location.href = "/SmartClass/client/login.php";
+        return;
       }
-    });
 
+      // 👉 ALUMNO / PROFESOR / TUTOR → FLUTTER
+      if (['alumno', 'profesor', 'tutor'].includes(rol)) {
+
+        const flutterWebUrl =
+          `http://localhost:8080/SmartClass/app/?email=${encodeURIComponent(email)}&rol=${rol}`;
+
+        const flutterAppUrl =
+          `smartclass://login?email=${encodeURIComponent(email)}&rol=${rol}`;
+
+        if (isMobile()) {
+          window.location.href = flutterAppUrl;
+
+          setTimeout(() => {
+            window.location.href = flutterWebUrl;
+          }, 1500);
+        } else {
+          window.location.href = flutterWebUrl;
+        }
+
+        return;
+      }
+
+      showToast("Rol no autorizado: " + rol);
+
+    } catch (error) {
+      console.error(error);
+      showToast("Error al conectar con el servidor");
+      submitBtn.disabled = false;
+      submitBtn.innerText = 'Iniciar sesión';
+    }
   });
-  </script>
+});
+</script>
 
 </body>
 </html>

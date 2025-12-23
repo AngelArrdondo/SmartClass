@@ -15,9 +15,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String _nombre = "";
   String _rol = "";
-  // Simulamos datos de grupo para que el alumno se vea completo como en PHP
-  String _grupoInfo = "5º A (Matutino)"; 
-  String _matricula = "20241021"; // Dato simulado, debería venir de la API
+  String _grupoInfo = "";
+  String _matricula = "";
   List<dynamic> _horarioHoy = []; // Usamos una lista nueva para el horario de hoy
   bool _isLoading = true;
 
@@ -44,17 +43,32 @@ class _HomeScreenState extends State<HomeScreen> {
       
       // Simulación de datos extra del alumno
       if (rol == 'alumno') {
-        // En una app real, esta matrícula e info de grupo se obtendría aquí:
-        // final alumnoData = await ApiService.getAlumnoData(perfilId); 
-        // _grupoInfo = alumnoData['grupo_info'];
-        // _matricula = alumnoData['matricula'];
+        final alumnoRes = await ApiService.getAlumnoData(perfilId);
+
+        if (alumnoRes['success'] == true && alumnoRes['data'] != null) {
+          _grupoInfo = alumnoRes['data']['grupo_info'] ?? '';
+          _matricula = alumnoRes['data']['matricula'] ?? '';
+        }
       }
 
       if (mounted) {
-        // En este punto, `res['data']` tiene todo el horario, lo filtramos por el día de hoy.
-        final List<dynamic> horarioCompleto = res['data'] ?? [];
-        final List<dynamic> horarioHoyFiltrado = horarioCompleto.where((item) => item['dia_semana'] == diaHoy).toList();
-        
+        if (res['success'] != true || res['data'] == null) {
+          setState(() {
+            _nombre = nombre ?? "Usuario";
+            _rol = rol;
+            _horarioHoy = [];
+            _isLoading = false;
+          });
+          return;
+        }
+
+        final List<dynamic> horarioCompleto = List.from(res['data']);
+        final List<dynamic> horarioHoyFiltrado = horarioCompleto.where((item) {
+          final diaApi = item['dia_semana']?.toString().toLowerCase().trim();
+          final diaLocal = diaHoy.toLowerCase().trim();
+          return diaApi == diaLocal;
+        }).toList();
+                
         setState(() {
           _nombre = nombre ?? "Usuario";
           _rol = rol;
@@ -63,7 +77,12 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     } else {
-      _logout();
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
     }
   }
   
@@ -83,10 +102,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _logout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+
+    // ❌ NO BORRES TODO
+    // await prefs.clear();
+
+    // ✅ SOLO BORRA LA SESIÓN
+    await prefs.remove('perfil_id');
+    await prefs.remove('rol');
+    await prefs.remove('nombre');
+
     if (!mounted) return;
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
   }
+
 
   // Widget para el botón grande con efecto hover
   Widget _buildPanelButton({
@@ -388,8 +420,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (_rol == 'alumno') ...[
                   // Simulación de datos de Grupo (como en PHP)
                   Text(
-                    _grupoInfo.split(' ')[1] ?? '---', // 5º A
-                    style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.black87),
+                    _grupoInfo.isNotEmpty ? _grupoInfo : "---",
+                    style: const TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
                   Container(
                     margin: const EdgeInsets.only(top: 8),

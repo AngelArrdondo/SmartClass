@@ -4,6 +4,8 @@ from pydantic import BaseModel
 import mysql.connector
 import bcrypt
 import logging
+from pydantic import BaseModel
+
 
 # Configuración de logs
 logging.basicConfig(level=logging.INFO)
@@ -24,14 +26,18 @@ app.add_middleware(
 class LoginRequest(BaseModel):
     email: str
     password: str
+class CheckEmailRequest(BaseModel):
+    email: str
 
 # --- CONFIGURACIÓN BD ---
 db_config = {
-    'host': 'localhost',
+    'host': 'localhost',  # Cambia 127.0.0.1 por localhost
     'port': 3307,
     'user': 'root',
     'password': '', 
-    'database': 'SmartClass'
+    'database': 'SmartClass',
+    # Esta línea es la que suele arreglar el error 111 en Linux/XAMPP:
+    'unix_socket': '/opt/lampp/var/mysql/mysql.sock' 
 }
 
 def get_db_connection():
@@ -184,7 +190,68 @@ def get_horario(
         cursor.close()
         conn.close()
 
-if __name__ == "__main__":
-    import uvicorn
-    # Recargar servidor automáticamente al guardar cambios
-    uvicorn.run("app:app", host="0.0.0.0", port=5000, reload=True)
+@app.post("/api/check-email")
+def check_email(data: CheckEmailRequest):
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="Error BD")
+
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT r.nombre AS rol
+        FROM users u
+        JOIN roles r ON u.role_id = r.id
+        WHERE u.email = %s AND u.is_active = 1
+    """, (data.email,))
+
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if not user:
+        return {"success": False, "message": "Correo no registrado"}
+
+    return {"success": True, "rol": user['rol']}
+# --- ENDPOINT 3: DATOS DEL ALUMNO ---
+@app.get("/api/alumnos/{perfil_id}")
+def get_alumno_data(perfil_id: int):
+    conn = get_db_connection()
+    if not conn:
+        raise HTTPException(status_code=500, detail="Error BD")
+
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        query = """
+            SELECT 
+                a.matricula,
+                g.grado,
+                g.grupo,
+                g.turno
+            FROM alumnos a
+            JOIN grupos g ON a.grupo_id = g.id
+            WHERE a.id = %s
+        """
+        cursor.execute(query, (perfil_id,))
+        alumno = cursor.fetchone()
+
+        if not alumno:
+            raise HTTPException(status_code=404, detail="Alumno no encontrado")
+
+        grupo_info = f"{alumno['grado']} {alumno['grupo']} ({alumno['turno']})"
+
+        return {
+            "success": True,
+            "data": {
+                "matricula": alumno["matricula"],
+                "grupo_info": grupo_info
+            }
+        }
+
+    except Exception as e:
+        logger.error(f"Error alumno: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
